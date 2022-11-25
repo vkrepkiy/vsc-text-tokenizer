@@ -1,9 +1,21 @@
-import { workspace } from "vscode";
+import { window, workspace } from "vscode";
+import { toJsonDocument } from "../utils/helpers";
 import { TmpResultStore } from "../utils/tmp-result-store";
 
-export async function generateResults() {
-  await workspace.openTextDocument({
+export async function generateJsonDocument() {
+  const document = await workspace.openTextDocument({
     language: "json",
-    content: await TmpResultStore.toString(),
+    content: toJsonDocument(await TmpResultStore.getJson()),
   });
+
+  await window.showTextDocument(document);
+}
+
+export async function generateArrayDocument() {
+  const document = await workspace.openTextDocument({
+    language: "json",
+    content: toJsonDocument(await TmpResultStore.getArray()),
+  });
+
+  await window.showTextDocument(document);
 }

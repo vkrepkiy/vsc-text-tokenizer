@@ -1,4 +1,5 @@
-import { window } from "vscode";
+import { QuickPickItem, window } from "vscode";
+import { wrapToken } from "../utils/helpers";
 import { TmpResultStore } from "../utils/tmp-result-store";
 
 export async function replaceWithToken() {
@@ -10,57 +11,70 @@ export async function replaceWithToken() {
   }
 
   const selection = editor.selection;
-  const text = editor.document.getText(selection);
+  const selectedText = editor.document.getText(selection);
 
-  const localizationToken = await askForToken();
+  const token = await askForToken(selectedText);
 
-  if (!localizationToken) {
-    window.showInformationMessage(
-      "No localization token was provided. Abort execution."
-    );
+  if (!token) {
+    window.showInformationMessage("No token was provided");
     return;
   }
 
-  const localizationNote = await window.showInputBox({
-    title: "Enter localization note (or leave input empty)",
-  });
-
-  const newEntry: Record<string, string> = {
-    translation: text,
-  };
-
-  if (localizationNote) {
-    newEntry.notes = localizationNote;
-  }
-
-  await TmpResultStore.set(localizationToken, newEntry);
+  await TmpResultStore.set(token, selectedText);
 
   editor.edit((editBuilder) => {
-    editBuilder.replace(selection, localizationToken);
+    editBuilder.replace(selection, wrapToken(token));
   });
 }
 
-async function askForToken(token = "", maxTry = 2): Promise<string> {
-  const localizationToken = await window.showInputBox({
-    title: "Enter localization token (unique)",
-    value: token,
+async function askForToken(
+  selectedText: string,
+  preDefinedToken?: string
+): Promise<string> {
+  const token = await window.showInputBox({
+    prompt: "Enter localization token",
+    value: preDefinedToken,
+    validateInput: (value) => (!value ? "You need to provide a token" : null),
   });
 
-  // Exit if user press ESC
-  if (localizationToken === undefined) {
+  if (token === undefined) {
     return "";
   }
 
-  // Try to ask again a few times if user provides empty string
-  if (!localizationToken) {
-    window.showErrorMessage("You need to provide localization token");
-    return --maxTry > 0 ? askForToken("", maxTry) : "";
-  }
+  const storedText = await TmpResultStore.getValue(token);
 
-  if (await TmpResultStore.has(localizationToken)) {
-    window.showErrorMessage(`This token "${localizationToken}" already exists`);
-    return askForToken(localizationToken);
-  }
+  switch (storedText) {
+    case undefined:
+    case selectedText:
+      return token;
+    default:
+      const overwriteValue = Symbol("overwriteValue");
+      const changeToken = Symbol("renameToken");
+      const overwrite = await window.showWarningMessage(
+        `The token already exists, would you like to overwrite the value?`,
+        {
+          modal: true,
+          detail: `Token: ${token} \n
+          Old value: ${storedText} \n
+          New value: ${selectedText} \n`,
+        },
+        {
+          title: "Overwrite",
+          value: overwriteValue,
+        },
+        {
+          title: "Change token",
+          value: changeToken,
+        }
+      );
 
-  return localizationToken;
+      switch (overwrite?.value) {
+        case overwriteValue:
+          return token;
+        case changeToken:
+          return askForToken(selectedText, token);
+        default:
+          return "";
+      }
+  }
 }

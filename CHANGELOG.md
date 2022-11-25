@@ -1,9 +1,8 @@
 # Change Log
 
-All notable changes to the "glovo-admin-fe-localization-tools" extension will be documented in this file.
+## 0.0.1
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+Add basic commands:
 
-## [Unreleased]
-
-- Initial release
+- vkrepkiy-tokenizer.replace-with-token
+- vkrepkiy-tokenizer.generate-results

@@ -1,8 +1,10 @@
 {
-  "name": "glovo-admin-fe-localization-tools",
-  "displayName": "Glovo Admin FE. Localization tools",
-  "description": "",
+  "name": "text-tokenizer",
+  "displayName": "Text Tokenizer",
+  "publisher": "vkrepkiy",
+  "description": "Replace selection with other value, generate list of replaced values",
   "version": "0.0.1",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -10,21 +12,32 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:glovo-admin-fe-localization-tools.replace-with-token",
-    "onCommand:glovo-admin-fe-localization-tools.generate-results"
+    "onCommand:text-tokenizer.replace-with-token",
+    "onCommand:text-tokenizer.generate-results"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "glovo-admin-fe-localization-tools.replace-with-token",
-        "title": "Glovo localization: Set localization token"
+        "command": "text-tokenizer.replace-with-token",
+        "title": "Text tokenizer: Replace selection with a token"
       },
       {
-        "command": "glovo-admin-fe-localization-tools.generate-results",
-        "title": "Glovo localization: Generate results"
+        "command": "text-tokenizer.generate-results",
+        "title": "Text tokenizer: Generate results and clean cache"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Text tokenizer",
+      "properties": {
+        "text-tokenizer.tokenWrapper": {
+          "type": "string",
+          "default": "{{ $translate(\"%token%\") }}",
+          "description": "You can customize token wrapper"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run compile",
