@@ -3,7 +3,7 @@
   "displayName": "Text Tokenizer",
   "publisher": "vkrepkiy",
   "description": "Replace selection with other value, generate list of replaced values",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "icon": "icon.png",
   "repository": {
