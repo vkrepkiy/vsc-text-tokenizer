@@ -1,6 +1,5 @@
 import { Memento } from "vscode";
-import { tokenStoreKey } from "../config";
-import { toJsonDocument } from "./helpers";
+import { tokenStoreKey } from "./extension-config";
 import { TokenStore } from "./types";
 
 export class TmpResultStore {
@@ -57,7 +56,9 @@ export class TmpResultStore {
     };
   }
 
-  public static async getValue(token: keyof TokenStore) {
+  public static async getValue(
+    token: keyof TokenStore
+  ): Promise<string | undefined> {
     const tmpResultsStore = await TmpResultStore.getTmpResultObject();
     return tmpResultsStore[token]?.value;
   }

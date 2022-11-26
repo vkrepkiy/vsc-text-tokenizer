@@ -1,5 +1,5 @@
 import { workspace } from "vscode";
-import { Configuration, extName, stringPlaceholder } from "../config";
+import { Configuration, extName, stringPlaceholder } from "./extension-config";
 
 export function getConfiguration<T extends keyof Configuration>(
   key: T

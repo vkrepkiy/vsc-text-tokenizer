@@ -1,4 +1,4 @@
-import { QuickPickItem, window } from "vscode";
+import { window } from "vscode";
 import { wrapToken } from "../utils/helpers";
 import { TmpResultStore } from "../utils/tmp-result-store";
 

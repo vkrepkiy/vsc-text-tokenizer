@@ -1,5 +1,5 @@
 import { Range, TextDocument, window, workspace } from "vscode";
-import { extName } from "../config";
+import { extName } from "./extension-config";
 
 export class TmpDocument {
   private static document: TextDocument;
