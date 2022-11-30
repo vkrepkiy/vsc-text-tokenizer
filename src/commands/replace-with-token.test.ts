@@ -1,9 +1,6 @@
+import * as assert from "assert";
 import { afterEach, beforeEach } from "mocha";
-import {
-  stub as sinonStub,
-  assert as sinonAssert,
-  restore as sinonRestore,
-} from "sinon";
+import { stub as sinonStub, restore as sinonRestore } from "sinon";
 import {
   commands,
   Selection,
@@ -16,7 +13,6 @@ import { Command } from "./types";
 import {
   defaultAfterEach,
   defaultBeforeEach,
-  getExtension,
   token1,
   value1,
 } from "../test/helpers";
@@ -40,6 +36,7 @@ suite("Replace with token", () => {
 
   afterEach(async () => {
     await defaultAfterEach();
+    sinonRestore();
   });
 
   test("should call store with correct token-value pair", async () => {
@@ -56,8 +53,6 @@ suite("Replace with token", () => {
     // run command
     await commands.executeCommand(Command.replaceWithToken);
 
-    sinonAssert.calledWith(tmpResultStoreSetSpy, token1, value1);
-
-    sinonRestore();
+    assert.ok(tmpResultStoreSetSpy.calledWith(token1, value1));
   });
 });
