@@ -17,3 +17,19 @@ export function wrapToken(token: string) {
 export function toJsonDocument(json: unknown) {
   return JSON.stringify(json, null, 2);
 }
+
+export function escapeRegExpSpecialChars(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function getFindTokenRegExp() {
+  const [before, after] =
+    getConfiguration("tokenWrapper").split(stringPlaceholder);
+
+  return new RegExp(
+    `${escapeRegExpSpecialChars(before)}(.*?)${escapeRegExpSpecialChars(
+      after
+    )}`,
+    "g"
+  );
+}

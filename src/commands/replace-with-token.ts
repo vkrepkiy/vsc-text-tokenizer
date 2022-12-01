@@ -13,6 +13,11 @@ export async function replaceWithToken() {
   const selection = editor.selection;
   const selectedText = editor.document.getText(selection);
 
+  if (!selectedText) {
+    window.showInformationMessage("Select a text to be replaced with a token");
+    return;
+  }
+
   const token = await askForToken(selectedText);
 
   if (!token) {

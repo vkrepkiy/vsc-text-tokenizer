@@ -1,7 +1,9 @@
-import { commands, ExtensionContext } from "vscode";
+import { commands, ExtensionContext, languages, window } from "vscode";
 import { generateArrayDocument } from "./commands/generate-results";
+import { previewToken } from "./commands/preview-token";
 import { replaceWithToken } from "./commands/replace-with-token";
 import { Command } from "./commands/types";
+import { showTokenValue } from "./utils/show-token-value";
 import { TmpResultStore } from "./utils/tmp-result-store";
 
 export function activate(context: ExtensionContext) {
@@ -9,20 +11,43 @@ export function activate(context: ExtensionContext) {
 
   let replaceWithI18nKeyCmd = commands.registerCommand(
     Command.replaceWithToken,
-    () => {
-      replaceWithToken();
+    async () => {
+      await replaceWithToken();
     }
   );
 
   let generateResultsCmd = commands.registerCommand(
     Command.generateResults,
-    () => {
-      generateArrayDocument();
+    async () => {
+      await generateArrayDocument();
       TmpResultStore.setEmpty();
     }
   );
 
-  context.subscriptions.push(replaceWithI18nKeyCmd, generateResultsCmd);
+  let previewTokenCmd = commands.registerCommand(
+    Command.previewToken,
+    async () => {
+      await previewToken();
+    }
+  );
+
+  let hoverProvider = languages.registerHoverProvider(
+    {
+      pattern: "**/*",
+    },
+    { provideHover: showTokenValue }
+  );
+
+  context.subscriptions.push(
+    replaceWithI18nKeyCmd,
+    generateResultsCmd,
+    previewTokenCmd,
+    hoverProvider
+  );
+
+  /**
+   * Register hover provider
+   */
 }
 
 export function deactivate() {}
