@@ -1,6 +1,5 @@
 import { commands, ExtensionContext, languages, window } from "vscode";
 import { generateArrayDocument } from "./commands/generate-results";
-import { previewToken } from "./commands/preview-token";
 import { replaceWithToken } from "./commands/replace-with-token";
 import { Command } from "./commands/types";
 import { showTokenValue } from "./utils/show-token-value";
@@ -24,13 +23,6 @@ export function activate(context: ExtensionContext) {
     }
   );
 
-  let previewTokenCmd = commands.registerCommand(
-    Command.previewToken,
-    async () => {
-      await previewToken();
-    }
-  );
-
   let hoverProvider = languages.registerHoverProvider(
     {
       pattern: "**/*",
@@ -41,7 +33,6 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     replaceWithI18nKeyCmd,
     generateResultsCmd,
-    previewTokenCmd,
     hoverProvider
   );
 

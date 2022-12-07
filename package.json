@@ -26,7 +26,6 @@
   "activationEvents": [
     "onCommand:text-tokenizer.replace-with-token",
     "onCommand:text-tokenizer.generate-results",
-    "onCommand:text-tokenizer.preview-token",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
@@ -39,10 +38,6 @@
       {
         "command": "text-tokenizer.generate-results",
         "title": "Text tokenizer: Generate results and clean cache"
-      },
-      {
-        "command": "text-tokenizer.preview-token",
-        "title": "Text tokenizer: Preview token value"
       }
     ],
     "configuration": {
