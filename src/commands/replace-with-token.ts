@@ -1,4 +1,4 @@
-import { window } from "vscode";
+import { TextEditor, window } from "vscode";
 import { wrapToken } from "../utils/helpers";
 import { TmpResultStore } from "../utils/tmp-result-store";
 
@@ -10,14 +10,43 @@ export async function replaceWithToken() {
     return;
   }
 
-  const selection = editor.selection;
-  const selectedText = editor.document.getText(selection);
+  const selectionsError = validateSelectionsAndGetError(editor);
 
-  if (!selectedText) {
-    window.showInformationMessage("Select a text to be replaced with a token");
+  if (selectionsError) {
+    window.showErrorMessage(selectionsError);
     return;
   }
 
+  await replaceSelectionsWithToken(editor);
+}
+
+function validateSelectionsAndGetError(editor: TextEditor): string | null {
+  /**
+   * Check if all selections are empty
+   */
+  if (
+    editor.selections.length === 0 ||
+    editor.selections.every((selection) => selection.isEmpty)
+  ) {
+    return "Select a text to be replaced with a token";
+  }
+
+  /**
+   * Check if all selections are equal
+   */
+  let referenceTextSelection = editor.document.getText(editor.selections[0]);
+  for (let i = 0; i < editor.selections.length; i++) {
+    const textSelection = editor.document.getText(editor.selections[i]);
+    if (referenceTextSelection !== textSelection) {
+      return `You have selected unequal text parts: ${referenceTextSelection} !== ${textSelection}`;
+    }
+  }
+
+  return null;
+}
+
+async function replaceSelectionsWithToken(editor: TextEditor) {
+  const selectedText = editor.document.getText(editor.selection);
   const token = await askForToken(selectedText);
 
   if (!token) {
@@ -25,10 +54,12 @@ export async function replaceWithToken() {
     return;
   }
 
-  await TmpResultStore.set(token, selectedText);
+  await TmpResultStore.set(token, editor.document.getText(editor.selection));
 
-  editor.edit((editBuilder) => {
-    editBuilder.replace(selection, wrapToken(token));
+  await editor.edit((editBuilder) => {
+    editor.selections.forEach((selection) => {
+      editBuilder.replace(selection, wrapToken(token));
+    });
   });
 }
 
