@@ -7,7 +7,7 @@ import {
   SinonStub,
 } from "sinon";
 import { window, workspace } from "vscode";
-import { TmpResultStore } from "../utils/tmp-result-store";
+import { TmpResultStore } from "../services/tmp-result-store";
 import { generateJsonDocument } from "./generate-results";
 import { toJsonDocument } from "../utils/helpers";
 

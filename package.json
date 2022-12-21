@@ -47,7 +47,22 @@
         "text-tokenizer.tokenWrapper": {
           "type": "string",
           "default": "{{ $translate(\"%token%\") }}",
-          "description": "You can customize token wrapper"
+          "description": "Token wrapper. Use %token% to indicate the place for token insertion"
+        },
+        "text-tokenizer.tokenCollectionGetter": {
+          "type": [
+            "json-map",
+            "json-array",
+            "string"
+          ],
+          "default": "json-map",
+          "description": "Path to the file which has a default export of token getter function",
+          "markdownDescription": "Getter type. It is possible to provide path to the file containing default export of function which returns TokenToValueItem[]. \n - `json-map` would handle JSON file in `{ \"your.token\": \"Text value\" }` format \n - `json-array` would handle JSON file in `{ token: \"your.token\", value: \"Text value\" }[]` format"
+        },
+        "text-tokenizer.tokenCollectionPath": {
+          "type": "string",
+          "default": "",
+          "description": "File under this path would be watched and `tokenCollectionGetter` function would be triggered on changes. Required when `tokenCollectionGetter` is defined."
         }
       }
     }

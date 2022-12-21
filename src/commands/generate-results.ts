@@ -1,6 +1,6 @@
 import { window, workspace } from "vscode";
 import { toJsonDocument } from "../utils/helpers";
-import { TmpResultStore } from "../utils/tmp-result-store";
+import { TmpResultStore } from "../services/tmp-result-store";
 
 export async function generateJsonDocument() {
   const document = await workspace.openTextDocument({

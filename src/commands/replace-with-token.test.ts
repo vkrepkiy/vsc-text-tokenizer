@@ -16,7 +16,7 @@ import {
   token1,
   value1,
 } from "../test/helpers";
-import { TmpResultStore } from "../utils/tmp-result-store";
+import { TmpResultStore } from "../services/tmp-result-store";
 
 suite("Replace with token", () => {
   let document: TextDocument;

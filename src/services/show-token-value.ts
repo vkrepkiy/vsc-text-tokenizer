@@ -1,7 +1,25 @@
 import { Hover, MarkdownString, Position, Range, TextDocument } from "vscode";
-import { getFindTokenRegExp } from "./helpers";
+import { tokenizerSettings } from "./tokenizer-settings";
+import { escapeRegExpSpecialChars, stringPlaceholder } from "../utils/helpers";
 import { TmpResultStore } from "./tmp-result-store";
+import { externalTokens } from "./external-tokens";
 
+function getFindTokenRegExp() {
+  const [before, after] = tokenizerSettings
+    .get("tokenWrapper")
+    .split(stringPlaceholder);
+
+  return new RegExp(
+    `${escapeRegExpSpecialChars(before)}(.*?)${escapeRegExpSpecialChars(
+      after
+    )}`,
+    "g"
+  );
+}
+
+/**
+ * TODO: investigate how to detect tokens with a language server
+ */
 export async function showTokenValue(
   document: TextDocument,
   cursorPosition: Position
@@ -22,7 +40,13 @@ export async function showTokenValue(
 
     if (matchRange.contains(cursorPosition)) {
       const token = matches[1];
-      const tokenValue = await TmpResultStore.getValue(token);
+
+      /**
+       * Check first in-memory (if any token has changed) and then look up in external store
+       */
+      const tokenValue =
+        (await TmpResultStore.getValue(token)) ||
+        (await externalTokens.get(token));
 
       if (tokenValue) {
         const mdText = `**${matches[1]}**  \n${tokenValue}`;

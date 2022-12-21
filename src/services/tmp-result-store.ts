@@ -1,6 +1,6 @@
 import { Memento } from "vscode";
-import { tokenStoreKey } from "./extension-config";
-import { TokenStore } from "./types";
+import { tokenStoreKey } from "../utils/helpers";
+import { TokenStore, TokenToValueItem } from "../utils/types";
 
 export class TmpResultStore {
   private static get emptyState() {
@@ -38,7 +38,7 @@ export class TmpResultStore {
     );
   }
 
-  public static async getArray() {
+  public static async getArray(): Promise<TokenToValueItem[]> {
     const tokenStore = await TmpResultStore.getTmpResultObject();
     return Object.keys(tokenStore).reduce((result, token) => {
       return [...result, { token, value: tokenStore[token].value }];

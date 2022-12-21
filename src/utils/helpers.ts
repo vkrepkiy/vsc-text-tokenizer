@@ -1,18 +1,11 @@
-import { workspace } from "vscode";
-import { Configuration, extName, stringPlaceholder } from "./extension-config";
+import { existsSync } from "fs";
+import { resolve } from "path";
 
-export function getConfiguration<T extends keyof Configuration>(
-  key: T
-): Configuration[T] {
-  return (
-    (workspace.getConfiguration(extName).get(key) as Configuration[T]) ||
-    new Configuration()[key]
-  );
-}
-
-export function wrapToken(token: string) {
-  return getConfiguration("tokenWrapper").replace(stringPlaceholder, token);
-}
+export const extName = "text-tokenizer";
+export const extPublisher = "vkrepkiy";
+export const extId = `${extPublisher}.${extName}`;
+export const tokenStoreKey = "tmpTokenStore";
+export const stringPlaceholder = "%token%";
 
 export function toJsonDocument(json: unknown) {
   return JSON.stringify(json, null, 2);
@@ -22,14 +15,9 @@ export function escapeRegExpSpecialChars(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export function getFindTokenRegExp() {
-  const [before, after] =
-    getConfiguration("tokenWrapper").split(stringPlaceholder);
+export function getAbsoluteFilePath(filePath: string) {
+  const absolutePath = resolve(filePath);
+  const exists = existsSync(absolutePath);
 
-  return new RegExp(
-    `${escapeRegExpSpecialChars(before)}(.*?)${escapeRegExpSpecialChars(
-      after
-    )}`,
-    "g"
-  );
+  return exists ? absolutePath : undefined;
 }

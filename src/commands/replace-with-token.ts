@@ -1,6 +1,7 @@
 import { TextEditor, window } from "vscode";
-import { wrapToken } from "../utils/helpers";
-import { TmpResultStore } from "../utils/tmp-result-store";
+import { tokenizerSettings } from "../services/tokenizer-settings";
+import { TmpResultStore } from "../services/tmp-result-store";
+import { stringPlaceholder } from "../utils/helpers";
 
 export async function replaceWithToken() {
   const editor = window.activeTextEditor;
@@ -58,7 +59,10 @@ async function replaceSelectionsWithToken(editor: TextEditor) {
 
   await editor.edit((editBuilder) => {
     editor.selections.forEach((selection) => {
-      editBuilder.replace(selection, wrapToken(token));
+      editBuilder.replace(
+        selection,
+        tokenizerSettings.get("tokenWrapper").replace(stringPlaceholder, token)
+      );
     });
   });
 }

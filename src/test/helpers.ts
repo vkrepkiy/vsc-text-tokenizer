@@ -1,6 +1,6 @@
 import { commands, extensions, Selection, window, workspace } from "vscode";
 import { Command } from "../commands/types";
-import { extId } from "../utils/extension-config";
+import { extId } from "../utils/helpers";
 
 export function getExtension() {
   const result = extensions.getExtension(extId);
