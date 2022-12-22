@@ -5,6 +5,8 @@ import { ExtensionSettings } from "../utils/types";
 class TokenizerSettings implements ExtensionSettings {
   tokenWrapper = `{{ $translate("${stringPlaceholder}") }}`;
 
+  tokenRegExps = [];
+
   tokenCollectionGetter = null;
 
   tokenCollectionPath = "";

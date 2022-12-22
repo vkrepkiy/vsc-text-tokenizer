@@ -49,6 +49,13 @@
           "default": "{{ $translate(\"%token%\") }}",
           "description": "Token wrapper. Use %token% to indicate the place for token insertion"
         },
+        "text-tokenizer.tokenRegExps": {
+          "type": "array",
+          "default": [
+            "\\$translate\\([\\s\\n]*?['\"`](.*?)['\"`][\\s\\n]*?\\)"
+          ],
+          "description": "Regexps to detect tokens in files. Use %token% to indicate the place for token insertion"
+        },
         "text-tokenizer.tokenCollectionGetter": {
           "type": [
             "json-map",

@@ -7,8 +7,15 @@ export interface TokenStore {
 export interface ExtensionSettings {
   /**
    * Wrapper for the token (possibly HTML tag or function cal)
+   *
+   * TODO: let user decide wrapper for each file type
    */
   tokenWrapper: string;
+
+  /**
+   * Regexps to detect tokens in files
+   */
+  tokenRegExps: string[];
 
   /**
    * Getter type. It is possible to provide path to the file containing default export of function which returns TokenToValueItem[].
