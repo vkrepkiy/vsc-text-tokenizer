@@ -52,7 +52,8 @@
         "text-tokenizer.tokenRegExps": {
           "type": "array",
           "default": [
-            "\\$translate\\([\\s\\n]*?['\"`](.*?)['\"`][\\s\\n]*?\\)"
+            "translate\\([\\s\\n]*?['\"`]%token%['\"`][\\s\\n]*?\\)",
+            "useTranslator\\([\\s\\n]*?['\"`]%token%['\"`][\\s\\n]*?\\)"
           ],
           "description": "Regexps to detect tokens in files. Use %token% to indicate the place for token insertion"
         },

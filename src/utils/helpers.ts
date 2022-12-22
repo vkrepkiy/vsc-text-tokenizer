@@ -16,8 +16,12 @@ export function escapeRegExpSpecialChars(str: string) {
 }
 
 export function getAbsoluteFilePath(filePath: string) {
-  const absolutePath = resolve(filePath);
-  const exists = existsSync(absolutePath);
+  try {
+    const absolutePath = resolve(filePath);
+    const exists = existsSync(absolutePath);
 
-  return exists ? absolutePath : undefined;
+    return exists ? absolutePath : undefined;
+  } catch (e) {
+    return undefined;
+  }
 }

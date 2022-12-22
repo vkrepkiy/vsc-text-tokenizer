@@ -13,12 +13,10 @@ function getFindTokenRegExps(): RegExp[] {
   }
 
   // Not sure if it is correct to merge tokenWrapper-based regexp as a "fool-protection"
-  return regexps
-    .map((pattern) => {
-      const [before, after] = pattern.split(stringPlaceholder);
-      return new RegExp(`${before}(.*?)${after}`);
-    })
-    .concat(getFindTokenRegExp());
+  return regexps.map((pattern) => {
+    const [before, after] = pattern.split(stringPlaceholder);
+    return new RegExp(`${before}(.*?)${after}`, "g");
+  });
 }
 
 /**
@@ -44,14 +42,23 @@ export async function showTokenValue(
   document: TextDocument,
   cursorPosition: Position
 ) {
+  /**
+   * TODO: While I have too few tests, let this security counter protect the loop
+   * Possible case we should not exceed: 20 regexps x 10 matches on the line, stop after 10 times
+   */
+  let _secCounter = 2000;
   const regexps = getFindTokenRegExps();
   const textLine = document.lineAt(cursorPosition.line);
-  let matches;
 
   for (let i = 0; i < regexps.length; i++) {
-    const regex = regexps[i];
+    let matches;
+    const regexp = regexps[i];
 
-    while ((matches = regex.exec(textLine.text))) {
+    while ((matches = regexp.exec(textLine.text))) {
+      if (!_secCounter--) {
+        throw new Error("loop");
+      }
+
       const tokenStartPosition = new Position(
         textLine.lineNumber,
         matches.index

@@ -85,17 +85,23 @@ class ExternalTokens implements Disposable {
     const tokenCollectionGetter = tokenizerSettings.get(
       "tokenCollectionGetter"
     );
-    const tokenCollectionPath = getAbsoluteFilePath(
-      tokenizerSettings.get("tokenCollectionPath")
-    );
+    const tokenCollectionPath = tokenizerSettings.get("tokenCollectionPath");
 
     if (!tokenCollectionGetter || !tokenCollectionPath) {
       this.externalTokens = {};
       return;
     }
 
-    const tokenCollection = tokenCollectionPath
-      ? await import(tokenCollectionPath)
+    const tokenCollectionAbsolutePath =
+      getAbsoluteFilePath(tokenCollectionPath);
+
+    if (!tokenCollectionAbsolutePath) {
+      this.externalTokens = {};
+      return;
+    }
+
+    const tokenCollection = tokenCollectionAbsolutePath
+      ? await import(tokenCollectionAbsolutePath)
       : [];
 
     switch (tokenCollectionGetter) {
@@ -122,7 +128,7 @@ class ExternalTokens implements Disposable {
       default:
         const file = await import(tokenCollectionGetter);
         const getterFn: TokenCollectionGetterFn = file;
-        const array = await getterFn(tokenCollectionPath);
+        const array = await getterFn(tokenCollectionAbsolutePath);
 
         this.externalTokens = array.reduce((result, data) => {
           result[data.token] = { value: data.value };

@@ -1,7 +1,5 @@
 # TODO
 
-- test coverage
-- allow to define files with token-to-value mappings (e.g. localization files)
-  - getter function?
-  - direct writing to file?
-- add View to display progress, info, action buttons
+- test coverage (high priority)
+- add View to display progress, info, action buttons (high priority)
+- allow results to be merged to file (low priority)
