@@ -1,36 +1,41 @@
 import { Hover, MarkdownString, Position, Range, TextDocument } from "vscode";
 import { tokenizerSettings } from "./tokenizer-settings";
-import { escapeRegExpSpecialChars, stringPlaceholder } from "../utils/helpers";
+import {
+  escapeRegExpSpecialChars,
+  extName,
+  stringPlaceholder,
+} from "../utils/helpers";
 import { TmpResultStore } from "./tmp-result-store";
 import { externalTokens } from "./external-tokens";
 
-function getFindTokenRegExps(): RegExp[] {
-  const regexps = tokenizerSettings.get("tokenRegExps");
+export const tokenRegexpGroupName = `token`;
+export const tokenRegexpPattern = `(?<${tokenRegexpGroupName}>[^'"\`]+?)`;
+
+export function getTokenLookupRegExps(): RegExp[] {
+  const regexps = tokenizerSettings.get("tokenLookupRegExps");
 
   // fall back to wrapper-based regexp if no regexps provided
   if (!regexps || !regexps.length) {
-    return [getFindTokenRegExp()];
+    return [getLegacyTokenRegExp()];
   }
 
-  // Not sure if it is correct to merge tokenWrapper-based regexp as a "fool-protection"
-  return regexps.map((pattern) => {
-    const [before, after] = pattern.split(stringPlaceholder);
-    return new RegExp(`${before}(.*?)${after}`, "g");
-  });
+  return regexps.map((regexp) => new RegExp(regexp, "g"));
 }
 
 /**
  * Calculate `tokenWrapper`-based regexp to search for token
+ *
+ * @deprecated
  */
-function getFindTokenRegExp() {
+export function getLegacyTokenRegExp() {
   const [before, after] = tokenizerSettings
     .get("tokenWrapper")
     .split(stringPlaceholder);
 
   return new RegExp(
-    `${escapeRegExpSpecialChars(before)}(.*?)${escapeRegExpSpecialChars(
-      after
-    )}`,
+    `${escapeRegExpSpecialChars(
+      before
+    )}${tokenRegexpPattern}${escapeRegExpSpecialChars(after)}`,
     "g"
   );
 }
@@ -47,7 +52,7 @@ export async function showTokenValue(
    * Possible case we should not exceed: 20 regexps x 10 matches on the line, stop after 10 times
    */
   let _secCounter = 2000;
-  const regexps = getFindTokenRegExps();
+  const regexps = getTokenLookupRegExps();
   const textLine = document.lineAt(cursorPosition.line);
 
   for (let i = 0; i < regexps.length; i++) {
@@ -72,7 +77,12 @@ export async function showTokenValue(
       const matchRange = new Range(tokenStartPosition, tokenEndPosition);
 
       if (matchRange.contains(cursorPosition)) {
-        const token = matches[1];
+        const groups = matches.groups;
+        const token = groups && groups[tokenRegexpGroupName];
+
+        if (!token) {
+          return;
+        }
 
         /**
          * Check first in-memory (if any token has changed) and then look up in external store
@@ -82,7 +92,7 @@ export async function showTokenValue(
           (await externalTokens.get(token));
 
         if (tokenValue) {
-          const mdText = `**${matches[1]}**  \n${tokenValue}`;
+          const mdText = `**${token}**  \n${tokenValue}`;
           return new Hover(new MarkdownString(mdText), matchRange);
         }
       }

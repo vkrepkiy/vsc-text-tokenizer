@@ -7,5 +7,10 @@
   {
     "token": "token2",
     "value": "token two"
+  },
+
+  {
+    "token": "order.details.refund_modal.details_placeholdder",
+    "value": "details placeholder"
   }
 ]

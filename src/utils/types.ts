@@ -13,9 +13,14 @@ export interface ExtensionSettings {
   tokenWrapper: string;
 
   /**
-   * Regexps to detect tokens in files
+   * Regexps to detect tokens in files. Should expose a capturing group named "token"
+   *
+   * * @example
+   * [
+   *   "(['\"`])(?<token>.+?)\\1"
+   * ]
    */
-  tokenRegExps: string[];
+  tokenLookupRegExps: string[];
 
   /**
    * Getter type. It is possible to provide path to the file containing default export of function which returns TokenToValueItem[].
@@ -30,6 +35,21 @@ export interface ExtensionSettings {
    * Required when `tokenCollectionGetter` is defined.
    */
   tokenCollectionPath: string;
+
+  /**
+   * Activate inline hints (missing token value and value preview)
+   */
+  inlineHints: boolean;
+
+  /**
+   * CSS to be applied to inline hints
+   */
+  inlineValueNotFoundCSS: string;
+
+  /**
+   * CSS to be applied to inline hints
+   */
+  inlineValueCSS: string;
 }
 
 export interface TokenToValueItem {

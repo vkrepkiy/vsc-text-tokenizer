@@ -49,11 +49,11 @@
           "default": "{{ $translate(\"%token%\") }}",
           "description": "Token wrapper. Use %token% to indicate the place for token insertion"
         },
-        "text-tokenizer.tokenRegExps": {
+        "text-tokenizer.tokenLookupRegExps": {
           "type": "array",
           "default": [
-            "translate\\([\\s\\n]*?['\"`]%token%['\"`][\\s\\n]*?\\)",
-            "useTranslator\\([\\s\\n]*?['\"`]%token%['\"`][\\s\\n]*?\\)"
+            "translate\\((['\"`])(?<token>.+?)\\1\\)",
+            "useTranslator\\((['\"`])(?<token>.+?)\\1\\)"
           ],
           "description": "Regexps to detect tokens in files. Use %token% to indicate the place for token insertion"
         },
@@ -65,12 +65,27 @@
           ],
           "default": "json-map",
           "description": "Path to the file which has a default export of token getter function",
-          "markdownDescription": "Getter type. It is possible to provide path to the file containing default export of function which returns TokenToValueItem[]. \n - `json-map` would handle JSON file in `{ \"your.token\": \"Text value\" }` format \n - `json-array` would handle JSON file in `{ token: \"your.token\", value: \"Text value\" }[]` format"
+          "markdownDescription": "Getter preset or path to the file with default export of a getter function. \n - `json-map` would handle JSON file in `{ \"your.token\": \"Text value\" }` format \n - `json-array` would handle JSON file in `{ token: \"your.token\", value: \"Text value\" }[]` format \n `path/to/exported/function.js` should return JSON like the one expected when using `json-array` formatter preset. See readme for more details."
         },
         "text-tokenizer.tokenCollectionPath": {
           "type": "string",
           "default": "",
           "description": "File under this path would be watched and `tokenCollectionGetter` function would be triggered on changes. Required when `tokenCollectionGetter` is defined."
+        },
+        "text-tokenizer.inlineHints": {
+          "type": "boolean",
+          "default": true,
+          "description": "Activate inline hints (missing token value and previews)"
+        },
+        "text-tokenizer.inlineValueCSS": {
+          "type": "string",
+          "default": "position: relative;display: inline-block;margin: 0 5px 0 5px;padding: 0 5px 0 5px;border-radius: 5px;vertical-align: middle;opacity: 0.6;max-width: 150px;overflow: hidden;text-overflow: ellipsis;",
+          "description": "CSS to be applied to inline hints when value is found"
+        },
+        "text-tokenizer.inlineValueNotFoundCSS": {
+          "type": "string",
+          "default": "position: relative;display: inline-block;vertical-align: middle;margin: 0 5px 0 5px;opacity: 0.6;",
+          "description": "CSS to be applied to inline hints when value is not found"
         }
       }
     }

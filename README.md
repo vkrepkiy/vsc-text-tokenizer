@@ -1,6 +1,6 @@
 # Text Tokenizer
 
-This extension is meant to improve the process of replacing text parts with tokens (e.g. localization of hardcoded values). It is designed to be framework agnostic, so make sure to configure it to achieve the best experience.
+This extension is developed to improve the process of replacing text parts with tokens (e.g. localization of hardcoded values) and to provide visual hints. To enable all features it's required to configure the extension.
 
 ## Text tokenization
 
@@ -30,15 +30,15 @@ The default scenario is to have a token inside some wrapper (e.g. localization f
 
 ### Mouseover hints configuration
 
-#### **text-tokenizer.tokenRegExps**
+#### **text-tokenizer.tokenLookupRegExps**
 
-It is possible to provide multiple regular expressions to let the extension to look up for different patterns to extract token.
+It is possible to provide multiple regular expressions to let the extension to look up for different patterns to extract token. Each regular expression should have "token" named capturing group.
 
 ```json
 {
-  "text-tokenizer.tokenRegExps": [
-    "translate\\([\\s\\n]*?['\"`]%token%['\"`][\\s\\n]*?\\)",
-    "useTranslator\\([\\s\\n]*?['\"`]%token%['\"`][\\s\\n]*?\\)"
+  "text-tokenizer.tokenLookupRegExps": [
+    "translate\\((['\"`])(?<token>.+?)\\1\\)",
+    "useTranslator\\((['\"`])(?<token>.+?)\\1\\)"
   ]
 }
 ```
@@ -137,6 +137,40 @@ module.exports = async function (tokenCollectionPath) {
   return JSON.parse(fileContent).tokens;
 };
 
+```
+
+### Inline hints configuration
+
+Inline hints would be helpful if basic "mouseover hints" configuration is done.
+
+#### **text-tokenizer.inlineHints**
+
+Enable or disable inline hints. It would visualize values preview for each token and mark tokens without values.
+
+```json
+{
+  "text-tokenizer.inlineHints": true
+}
+```
+
+#### **text-tokenizer.inlineValueCSS**
+
+CSS to be applied to inline hints when value is found.
+
+```json
+{
+  "text-tokenizer.inlineValueCSS": "display: inline-block;margin: 0 5px 0 5px;padding: 0 5px 0 5px;"
+}
+```
+
+#### **text-tokenizer.inlineValueNotFoundCSS**
+
+CSS to be applied to inline hints when value is not found.
+
+```json
+{
+  "text-tokenizer.inlineValueNotFoundCSS": "display: inline-block;margin: 0 5px 0 5px;padding: 0 5px 0 5px;"
+}
 ```
 
 ## Commands
