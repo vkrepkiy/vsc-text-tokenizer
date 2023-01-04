@@ -52,10 +52,10 @@
         "text-tokenizer.tokenLookupRegExps": {
           "type": "array",
           "default": [
-            "translate\\((['\"`])(?<token>.+?)\\1\\)",
-            "useTranslator\\((['\"`])(?<token>.+?)\\1\\)"
+            "translate\\([\\n\\s\\r]*?(['\"`])(?<token>.+?)\\1",
+            "useTranslator\\([\\n\\s\\r]*?(['\"`])(?<token>.+?)\\1"
           ],
-          "description": "Regexps to detect tokens in files. Use %token% to indicate the place for token insertion"
+          "description": "Regexps to detect tokens in files. Should expose a capturing group named 'token'"
         },
         "text-tokenizer.tokenCollectionGetter": {
           "type": [
@@ -65,7 +65,7 @@
           ],
           "default": "json-map",
           "description": "Path to the file which has a default export of token getter function",
-          "markdownDescription": "Getter preset or path to the file with default export of a getter function. \n - `json-map` would handle JSON file in `{ \"your.token\": \"Text value\" }` format \n - `json-array` would handle JSON file in `{ token: \"your.token\", value: \"Text value\" }[]` format \n `path/to/exported/function.js` should return JSON like the one expected when using `json-array` formatter preset. See readme for more details."
+          "markdownDescription": "Getter preset or path to the file with default export of a getter function. \n - `json-map` would handle JSON file in `{ \"your.token\": \"Text value\" }` format \n - `json-array` would handle JSON file in `{ token: \"your.token\", value: \"Text value\" }[]` format \n - `path/to/exported/function.js` should return JSON like the one expected when using `json-array` formatter preset. See readme for more details."
         },
         "text-tokenizer.tokenCollectionPath": {
           "type": "string",
