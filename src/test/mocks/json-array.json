@@ -10,7 +10,7 @@
   },
 
   {
-    "token": "order.details.refund_modal.details_placeholdder",
+    "token": "order.details.refund_modal.details_placeholder",
     "value": "details placeholder"
   }
 ]

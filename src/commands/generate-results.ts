@@ -1,11 +1,11 @@
 import { window, workspace } from "vscode";
-import { toJsonDocument } from "../utils/helpers";
-import { TmpResultStore } from "../services/tmp-result-store";
+import { toJsonDocument } from "../utils";
+import { TokenizerStorage } from "../core/tokenizer-storage";
 
 export async function generateJsonDocument() {
   const document = await workspace.openTextDocument({
     language: "json",
-    content: toJsonDocument(await TmpResultStore.getJson()),
+    content: toJsonDocument(await TokenizerStorage.getTokenSubStoreAsJson()),
   });
 
   await window.showTextDocument(document);
@@ -14,7 +14,7 @@ export async function generateJsonDocument() {
 export async function generateArrayDocument() {
   const document = await workspace.openTextDocument({
     language: "json",
-    content: toJsonDocument(await TmpResultStore.getArray()),
+    content: toJsonDocument(await TokenizerStorage.getTokenSubStoreAsArray()),
   });
 
   await window.showTextDocument(document);

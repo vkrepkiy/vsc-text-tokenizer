@@ -1,28 +1,83 @@
 import {
   DecorationInstanceRenderOptions,
   DecorationOptions,
-  ExtensionContext,
+  Disposable,
+  MarkdownString,
   Range,
   TextEditor,
   ThemeColor,
   window,
+  workspace,
 } from "vscode";
-import { externalTokens } from "./external-tokens";
 import {
-  getTokenLookupRegExps,
+  extName,
+  ThemeColorKeys,
+  tokenNotFondIcon,
   tokenRegexpGroupName,
-} from "./show-token-value";
-import { TmpResultStore } from "./tmp-result-store";
-import { tokenizerSettings } from "./tokenizer-settings";
+} from "../constants";
+import { externalTokenStorage } from "./external-token-storage";
+import { TokenizerStorage } from "./tokenizer-storage";
+import { tokenizerConfiguration } from "./tokenizer-configuration";
 
-export class Decorator {
+/**
+ * Provides the following features:
+ * - show inline hints (missing token / limited token value preview)
+ * - show full-length token value on hover
+ */
+class TokenizerDecorator implements Disposable {
+  private disposables: Disposable[] = [];
+
   public static defaultThrottleTimeMs = 500;
 
   private timer?: NodeJS.Timer;
 
   private decorationInstance = window.createTextEditorDecorationType({});
 
-  constructor(private context: ExtensionContext) {}
+  constructor() {
+    if (window.activeTextEditor) {
+      this.requestUpdateDecorations();
+    }
+
+    window.onDidChangeActiveTextEditor(
+      () => {
+        this.requestUpdateDecorations();
+      },
+      this,
+      this.disposables
+    );
+
+    workspace.onDidChangeTextDocument(
+      () => {
+        this.requestUpdateDecorations(true);
+      },
+      this,
+      this.disposables
+    );
+
+    workspace.onDidChangeConfiguration(
+      (e) => {
+        if (e.affectsConfiguration(extName)) {
+          this.requestUpdateDecorations();
+        }
+      },
+      this,
+      this.disposables
+    );
+  }
+
+  public dispose() {
+    this.disposables.forEach((d) => d.dispose());
+  }
+
+  private getTokenLookupRegExps(): RegExp[] {
+    const regexps = tokenizerConfiguration.get("tokenLookupRegExps");
+
+    if (!regexps || !regexps.length) {
+      return [];
+    }
+
+    return regexps.map((regexp) => new RegExp(regexp, "g"));
+  }
 
   private getDecoratorRenderOptions(
     tokenValue?: string
@@ -30,9 +85,9 @@ export class Decorator {
     if (!tokenValue) {
       return {
         before: {
-          contentText: "🔴",
-          color: new ThemeColor(`editorCodeLens.foreground`),
-          textDecoration: tokenizerSettings.get("inlineValueNotFoundCSS"),
+          contentText: tokenNotFondIcon,
+          color: new ThemeColor(ThemeColorKeys.tokenNotFoundColor),
+          textDecoration: tokenizerConfiguration.get("inlineValueNotFoundCSS"),
         },
       };
     }
@@ -40,8 +95,8 @@ export class Decorator {
     return {
       before: {
         contentText: tokenValue,
-        color: new ThemeColor(`editorCodeLens.foreground`),
-        textDecoration: tokenizerSettings.get("inlineValueCSS"),
+        color: new ThemeColor(ThemeColorKeys.tokenFoundColor),
+        textDecoration: tokenizerConfiguration.get("inlineValueCSS"),
       },
     };
   }
@@ -53,7 +108,8 @@ export class Decorator {
 
     const text = editor.document.getText();
     const decoratedTokens: DecorationOptions[] = [];
-    const regexps = getTokenLookupRegExps();
+    const regexps = this.getTokenLookupRegExps();
+    const showInlineHints = !!tokenizerConfiguration.get("inlineHints");
 
     await Promise.all(
       regexps.map(async (regexp) => {
@@ -75,8 +131,8 @@ export class Decorator {
            * Check first in-memory (if any token has changed) and then look up in external store
            */
           const tokenValue =
-            (await TmpResultStore.getValue(token)) ||
-            (await externalTokens.get(token));
+            (await TokenizerStorage.getTokenValue(token)) ||
+            (await externalTokenStorage.getTokenValue(token));
 
           const range = new Range(startPos, endPos);
           const foundText = editor.document.getText(range);
@@ -91,7 +147,12 @@ export class Decorator {
 
           decoratedTokens.push({
             range: new Range(tokenStartPos, tokenEndPos),
-            renderOptions: this.getDecoratorRenderOptions(tokenValue),
+            renderOptions: showInlineHints
+              ? this.getDecoratorRenderOptions(tokenValue)
+              : undefined,
+            hoverMessage: tokenValue
+              ? new MarkdownString(`**Token value:** ${tokenValue}`)
+              : undefined,
           });
         }
       })
@@ -107,15 +168,6 @@ export class Decorator {
       return;
     }
 
-    /**
-     * Check if user decided to deactivate inline hints
-     */
-    if (!tokenizerSettings.get("inlineHints")) {
-      editor.setDecorations(this.decorationInstance, []);
-
-      return;
-    }
-
     if (this.timer) {
       clearTimeout(this.timer);
       this.timer = undefined;
@@ -123,7 +175,7 @@ export class Decorator {
     if (throttle) {
       this.timer = setTimeout(
         () => this.updateDecorations(editor),
-        Decorator.defaultThrottleTimeMs
+        TokenizerDecorator.defaultThrottleTimeMs
       );
     } else {
       this.updateDecorations(editor);
@@ -131,16 +183,4 @@ export class Decorator {
   }
 }
 
-let instance: Decorator;
-
-export function getDecorator(context?: ExtensionContext) {
-  if (context) {
-    return (instance = new Decorator(context));
-  }
-
-  if (!instance) {
-    throw new Error("initialize decorator first with context!");
-  }
-
-  return instance;
-}
+export const tokenizerDecorator = new TokenizerDecorator();

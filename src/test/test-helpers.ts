@@ -1,6 +1,7 @@
+import { readFileSync } from "fs";
 import { commands, extensions, Selection, window, workspace } from "vscode";
-import { Command } from "../commands/types";
-import { extId } from "../utils/helpers";
+import { extId, extName, TokenizerCommand } from "../constants";
+import { ExtensionConfiguration } from "../types";
 
 export function getExtension() {
   const result = extensions.getExtension(extId);
@@ -26,6 +27,7 @@ export const exampleFileContent = `<!DOCTYPE html>
 <body>
     <h1>${value2}</h1>
     <p>${value3}</p>
+    <p>${value3}</p>
 </body>
 </html>`;
 
@@ -40,28 +42,23 @@ export async function defaultBeforeEach() {
   const editor = await window.showTextDocument(document);
 
   const line1 = editor.document.lineAt(5);
-  const selection1 = (editor.selection = new Selection(
-    line1.lineNumber,
-    11,
-    line1.lineNumber,
-    21
-  ));
+  const selection1 = new Selection(line1.lineNumber, 11, line1.lineNumber, 21);
 
   const line2 = editor.document.lineAt(11);
-  const selection2 = (editor.selection = new Selection(
-    line2.lineNumber,
-    8,
-    line2.lineNumber,
-    14
-  ));
+  const selection2 = new Selection(line2.lineNumber, 8, line2.lineNumber, 14);
 
   const line3 = editor.document.lineAt(12);
-  const selection3 = (editor.selection = new Selection(
-    line3.lineNumber,
-    7,
-    line3.lineNumber,
-    16
-  ));
+  const selection3 = new Selection(line3.lineNumber, 7, line3.lineNumber, 16);
+
+  /**
+   * `line4` points to the line which contains similar content to `line3`
+   */
+  const line4 = editor.document.lineAt(13);
+
+  /**
+   * `selection4` points to the selection which contains similar content to `selection3` (defined by `value3`)
+   */
+  const selection4 = new Selection(line4.lineNumber, 7, line4.lineNumber, 16);
 
   return {
     document,
@@ -69,12 +66,19 @@ export async function defaultBeforeEach() {
     selection1,
     selection2,
     selection3,
+    selection4,
   };
 }
 
 export async function defaultAfterEach() {
-  // Use side effect to clean storage cache
-  await commands.executeCommand(Command.generateResults);
+  // Use side effect to clean storage cache (unless there is a dedicated one)
+  await commands.executeCommand(TokenizerCommand.generateResults);
   // Close all editors
   await commands.executeCommand("workbench.action.closeAllEditors");
+}
+
+export async function updateConfiguration<
+  T extends keyof ExtensionConfiguration
+>(key: T, value: ExtensionConfiguration[T]) {
+  return await workspace.getConfiguration(extName).update(key, value);
 }

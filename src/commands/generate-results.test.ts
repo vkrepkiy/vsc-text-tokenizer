@@ -7,21 +7,19 @@ import {
   SinonStub,
 } from "sinon";
 import { window, workspace } from "vscode";
-import { TmpResultStore } from "../services/tmp-result-store";
-import { generateJsonDocument } from "./generate-results";
-import { toJsonDocument } from "../utils/helpers";
+import { TokenizerStorage } from "../core/tokenizer-storage";
+import {
+  generateArrayDocument,
+  generateJsonDocument,
+} from "./generate-results";
+import { toJsonDocument } from "../utils";
+import { TokenStore, TokenToValueItem } from "../types";
 
 suite("Generate results", () => {
-  let storeData: Record<string, unknown>;
-  let storeGetJsonStub: SinonStub;
   let vsOpenTextDocumentStub: SinonStub;
   let vsShowTextDocumentStub: SinonStub;
 
   beforeEach(async () => {
-    storeData = { testJSON: true };
-    storeGetJsonStub = sinonStub(TmpResultStore, "getJson").returns(
-      Promise.resolve(storeData)
-    );
     vsOpenTextDocumentStub = sinonStub(
       workspace,
       "openTextDocument"
@@ -36,27 +34,81 @@ suite("Generate results", () => {
     sinonRestore();
   });
 
-  test("should get JSON results from the store", async () => {
-    await generateJsonDocument();
-    assert.ok(storeGetJsonStub.calledOnce);
+  suite("generateJsonDocument()", () => {
+    let storeDataAsJSON: TokenStore;
+    let storeGetJsonStub: SinonStub;
+
+    beforeEach(() => {
+      storeDataAsJSON = {
+        token: {
+          value: "value",
+        },
+      };
+      storeGetJsonStub = sinonStub(
+        TokenizerStorage,
+        "getTokenSubStoreAsJson"
+      ).returns(Promise.resolve(storeDataAsJSON));
+    });
+
+    test("should get JSON results from the store", async () => {
+      await generateJsonDocument();
+      assert.ok(storeGetJsonStub.calledOnce);
+    });
+
+    test("should call openTextDocument with correct arguments", async () => {
+      await generateJsonDocument();
+      assert.ok(
+        vsOpenTextDocumentStub.calledWith(
+          sinonMatch({
+            language: "json",
+            content: toJsonDocument(storeDataAsJSON),
+          })
+        )
+      );
+    });
+
+    test("should call showTextDocument", async () => {
+      await generateJsonDocument();
+      const document = await vsOpenTextDocumentStub.returnValues[0];
+
+      assert.ok(vsShowTextDocumentStub.calledWith(document));
+    });
   });
 
-  test("should call openTextDocument with correct arguments", async () => {
-    await generateJsonDocument();
-    assert.ok(
-      vsOpenTextDocumentStub.calledWith(
-        sinonMatch({
-          language: "json",
-          content: toJsonDocument(storeData),
-        })
-      )
-    );
-  });
+  suite("generateArrayDocument()", () => {
+    let storeDataAsArray: TokenToValueItem[];
+    let storeGetArrayStub: SinonStub;
 
-  test("should call showTextDocument", async () => {
-    await generateJsonDocument();
-    const document = await vsOpenTextDocumentStub.returnValues[0];
+    beforeEach(() => {
+      storeDataAsArray = [{ token: "token", value: "value" }];
+      storeGetArrayStub = sinonStub(
+        TokenizerStorage,
+        "getTokenSubStoreAsArray"
+      ).returns(Promise.resolve(storeDataAsArray));
+    });
 
-    assert.ok(vsShowTextDocumentStub.calledWith(document));
+    test("should get Array results from the store", async () => {
+      await generateArrayDocument();
+      assert.ok(storeGetArrayStub.calledOnce);
+    });
+
+    test("should call openTextDocument with correct arguments", async () => {
+      await generateArrayDocument();
+      assert.ok(
+        vsOpenTextDocumentStub.calledWith(
+          sinonMatch({
+            language: "json",
+            content: toJsonDocument(storeDataAsArray),
+          })
+        )
+      );
+    });
+
+    test("should call showTextDocument", async () => {
+      await generateArrayDocument();
+      const document = await vsOpenTextDocumentStub.returnValues[0];
+
+      assert.ok(vsShowTextDocumentStub.calledWith(document));
+    });
   });
 });

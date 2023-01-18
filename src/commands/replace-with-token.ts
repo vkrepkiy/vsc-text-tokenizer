@@ -1,7 +1,8 @@
 import { TextEditor, window } from "vscode";
-import { tokenizerSettings } from "../services/tokenizer-settings";
-import { TmpResultStore } from "../services/tmp-result-store";
-import { stringPlaceholder } from "../utils/helpers";
+import { stringPlaceholder } from "../constants";
+import { externalTokenStorage } from "../core/external-token-storage";
+import { tokenizerConfiguration } from "../core/tokenizer-configuration";
+import { TokenizerStorage } from "../core/tokenizer-storage";
 
 export async function replaceWithToken() {
   const editor = window.activeTextEditor;
@@ -55,13 +56,18 @@ async function replaceSelectionsWithToken(editor: TextEditor) {
     return;
   }
 
-  await TmpResultStore.set(token, editor.document.getText(editor.selection));
+  await TokenizerStorage.setToken(
+    token,
+    editor.document.getText(editor.selection)
+  );
 
   await editor.edit((editBuilder) => {
     editor.selections.forEach((selection) => {
       editBuilder.replace(
         selection,
-        tokenizerSettings.get("tokenWrapper").replace(stringPlaceholder, token)
+        tokenizerConfiguration
+          .get("tokenWrapper")
+          .replace(stringPlaceholder, token)
       );
     });
   });
@@ -81,9 +87,11 @@ async function askForToken(
     return "";
   }
 
-  const storedText = await TmpResultStore.getValue(token);
+  const storedTokenValue =
+    (await TokenizerStorage.getTokenValue(token)) ||
+    (await externalTokenStorage.getTokenValue(token));
 
-  switch (storedText) {
+  switch (storedTokenValue) {
     case undefined:
     case selectedText:
       return token;
@@ -95,7 +103,7 @@ async function askForToken(
         {
           modal: true,
           detail: `Token: ${token} \n
-          Old value: ${storedText} \n
+          Old value: ${storedTokenValue} \n
           New value: ${selectedText} \n`,
         },
         {

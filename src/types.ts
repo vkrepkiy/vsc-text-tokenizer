@@ -4,7 +4,7 @@ export interface TokenStore {
   };
 }
 
-export interface ExtensionSettings {
+export interface ExtensionConfiguration {
   /**
    * Wrapper for the token (possibly HTML tag or function cal)
    *
