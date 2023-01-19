@@ -40,6 +40,14 @@
         "title": "Text tokenizer: Generate results and clean cache"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "!editorReadonly && editorHasSelection",
+          "command": "text-tokenizer.replace-with-token"
+        }
+      ]
+    },
     "configuration": {
       "type": "object",
       "title": "Text tokenizer",
