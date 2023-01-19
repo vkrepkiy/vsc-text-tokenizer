@@ -6,21 +6,24 @@ This extension is developed to improve the process of replacing text parts with 
 
 Each time you replace a string with a token it is stored in memory. You can make multiple replacement operations one by one and finally generate the results as a JSON file which can be easily processed for any application.
 
-## Mouseover hints
+## Inline and mouseover hints
 
-If properly configured (see "Configuration" section below) it would provide hints on mouse over tokens containing the associated value.
+If properly configured (see "Configuration" section below) it would provide:
+
+- inline hints (useful to detect tokens without assigned values)
+- full-text value preview on mouseover.
 
 ![Functionality presentation](./presentation.gif)
 
 ## Configuration
 
-It's recommended to define custom options in the [workspace settings](https://code.visualstudio.com/docs/getstarted/settings) to get the most out of the extension.
+It's recommended to define custom options in the [workspace settings](https://code.visualstudio.com/docs/getstarted/settings).
 
 ### Text tokenization configuration
 
 #### **text-tokenizer.tokenWrapper**
 
-The default scenario is to have a token inside some wrapper (e.g. localization function or HTML tag), you can define a `text-tokenizer.tokenWrapper` param.
+The default scenario is to have a token inside some wrapper (e.g. a localization function or an HTML tag) Define a `text-tokenizer.tokenWrapper` and it would be sed as a fallback value if no override is configured in `text-tokenizer.tokenWrappersByLanguageId`.
 
 ```json
 {
@@ -28,7 +31,20 @@ The default scenario is to have a token inside some wrapper (e.g. localization f
 }
 ```
 
-### Mouseover hints configuration
+#### **text-tokenizer.tokenWrappersByLanguageId**
+
+To have different wrappers for different file types you can define a `text-tokenizer.tokenWrappersByLanguageId` param. It relies on [language ID](https://code.visualstudio.com/docs/getstarted/tips-and-tricks#_change-language-mode) detected by VS Code:
+
+```json
+{
+  "text-tokenizer.tokenWrappersByLanguageId": {
+    "html": "{{ $translate(\"%token%\") }}",
+    "typescript": "useTranslator(\"%token%\")"
+  }
+}
+```
+
+### Inline and mouseover hints configuration
 
 #### **text-tokenizer.tokenLookupRegExps**
 
@@ -200,7 +216,6 @@ This command would open a new document with all replaced selection-to-token pair
 
 ## Limitations
 
-I'm trying to improve this extension in my free time, but still there is much to do. The most important limitations are caused by the fact that now this extension relies on **RegExps** to detect tokens on a **single line**, so:
+I'm trying to improve this extension in my free time, but still there is much to do. The most important limitation is caused by the fact that now this extension relies on **RegExps**, so:
 
-- it can't detect multiline wrapped tokens even if such regexps are provided;
-- it can't detect dynamic tokens like `errors.${key}` as it is not relying on any language server.
+- it can't detect dynamic tokens like `errors.${key}` (language server implementation PR would be welcome).

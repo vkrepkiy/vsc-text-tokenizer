@@ -16,6 +16,8 @@ import { ExtensionConfiguration } from "../types";
 class TokenizerConfiguration implements ExtensionConfiguration {
   tokenWrapper = defaultTokeWrapper;
 
+  tokenWrappersByLanguageId: Record<string, string> = {};
+
   tokenLookupRegExps = defaultTokenLookupRegexps;
 
   inlineValueNotFoundCSS = defaultInlineValueNotFoundCSS;

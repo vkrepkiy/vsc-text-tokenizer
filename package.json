@@ -47,7 +47,15 @@
         "text-tokenizer.tokenWrapper": {
           "type": "string",
           "default": "{{ $translate(\"%token%\") }}",
-          "description": "Token wrapper. Use %token% to indicate the place for token insertion"
+          "description": "Default wrapper for the token. Use %token% to indicate the place for token insertion."
+        },
+        "text-tokenizer.tokenWrappersByLanguageId": {
+          "type": "object",
+          "default": {
+            "html": "{{ $translate(\"%token%\") }}",
+            "typescript": "useTranslator(\"%token%\")"
+          },
+          "description": "Token wrappers defined by the Language ID (see https://code.visualstudio.com/docs/getstarted/tips-and-tricks#_change-language-mode). Use %token% to indicate the place for token insertion."
         },
         "text-tokenizer.tokenLookupRegExps": {
           "type": "array",

@@ -47,6 +47,16 @@ function validateSelectionsAndGetError(editor: TextEditor): string | null {
   return null;
 }
 
+/**
+ * TODO: think of validating all these fields this on the configuration level
+ */
+function getTokenWrapperByLanguageId(languageId: string) {
+  return (
+    tokenizerConfiguration.get("tokenWrappersByLanguageId")[languageId] ||
+    tokenizerConfiguration.get("tokenWrapper")
+  );
+}
+
 async function findTokenForValue(text: string) {
   return (
     (await TokenizerStorage.getTokenSubStoreAsArray()).find(
@@ -77,9 +87,10 @@ async function replaceSelectionsWithToken(editor: TextEditor) {
     editor.selections.forEach((selection) => {
       editBuilder.replace(
         selection,
-        tokenizerConfiguration
-          .get("tokenWrapper")
-          .replace(stringPlaceholder, token)
+        getTokenWrapperByLanguageId(editor.document.languageId).replace(
+          stringPlaceholder,
+          token
+        )
       );
     });
   });

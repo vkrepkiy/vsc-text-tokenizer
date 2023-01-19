@@ -6,11 +6,24 @@ export interface TokenStore {
 
 export interface ExtensionConfiguration {
   /**
-   * Wrapper for the token (possibly HTML tag or function cal)
+   * Default wrapper for the token. Use %token% to indicate the place for token insertion.
    *
-   * TODO: let user decide wrapper for each file type
+   * @example
+   * "text-tokenizer.tokenWrapper": "{{ $translate(\"%token%\") }}"
    */
   tokenWrapper: string;
+
+  /**
+   * Token wrappers defined by the Language ID (see https://code.visualstudio.com/docs/getstarted/tips-and-tricks#_change-language-mode).
+   * Use %token% to indicate the place for token insertion.
+   *
+   * @example
+   * "text-tokenizer.tokenWrappersByLanguageId": {
+   *   "html": "{{ $translate(\"%token%\") }}",
+   *   "ts": "translate(\"%token%\")",
+   * }
+   */
+  tokenWrappersByLanguageId: Record<string, string>;
 
   /**
    * Regexps to detect tokens in files. Should expose a capturing group named "token"
