@@ -47,9 +47,21 @@ function validateSelectionsAndGetError(editor: TextEditor): string | null {
   return null;
 }
 
+async function findTokenForValue(text: string) {
+  return (
+    (await TokenizerStorage.getTokenSubStoreAsArray()).find(
+      (x) => x.value === text
+    )?.token ||
+    (await externalTokenStorage.getTokenSubStoreAsArray()).find(
+      (x) => x.value === text
+    )?.token
+  );
+}
+
 async function replaceSelectionsWithToken(editor: TextEditor) {
   const selectedText = editor.document.getText(editor.selection);
-  const token = await askForToken(selectedText);
+  const proposedToken = await findTokenForValue(selectedText);
+  const token = await askForToken(selectedText, proposedToken);
 
   if (!token) {
     window.showInformationMessage("No token was provided");

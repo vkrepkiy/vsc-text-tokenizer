@@ -25,6 +25,8 @@ import { tokenizerConfiguration } from "./tokenizer-configuration";
  * - show full-length token value on hover
  */
 class TokenizerDecorator implements Disposable {
+  public static instance?: TokenizerDecorator;
+
   private disposables: Disposable[] = [];
 
   public static defaultThrottleTimeMs = 500;
@@ -34,6 +36,16 @@ class TokenizerDecorator implements Disposable {
   private decorationInstance = window.createTextEditorDecorationType({});
 
   constructor() {
+    if (TokenizerDecorator.instance) {
+      throw new Error("should be initialized once");
+    }
+
+    TokenizerDecorator.instance = this;
+
+    this.initializeWatchers();
+  }
+
+  public initializeWatchers() {
     if (window.activeTextEditor) {
       this.requestUpdateDecorations();
     }
@@ -183,4 +195,6 @@ class TokenizerDecorator implements Disposable {
   }
 }
 
-export const tokenizerDecorator = new TokenizerDecorator();
+export function getTokenizerDecorator() {
+  return TokenizerDecorator.instance || new TokenizerDecorator();
+}

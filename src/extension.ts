@@ -4,7 +4,7 @@ import { replaceWithToken } from "./commands/replace-with-token";
 import { externalTokenStorage } from "./core/external-token-storage";
 import { TokenizerStorage } from "./core/tokenizer-storage";
 import { TokenizerCommand } from "./constants";
-import { tokenizerDecorator } from "./core/tokenizer-decorator";
+import { getTokenizerDecorator } from "./core/tokenizer-decorator";
 
 export function activate(context: ExtensionContext) {
   TokenizerStorage.initialize(context.workspaceState);
@@ -28,7 +28,7 @@ export function activate(context: ExtensionContext) {
     replaceWithI18nKeyCmd,
     generateResultsCmd,
     externalTokenStorage,
-    tokenizerDecorator
+    getTokenizerDecorator()
   );
 }
 

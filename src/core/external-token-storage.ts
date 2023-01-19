@@ -5,6 +5,7 @@ import {
   JsonMapTokens,
   TokenCollectionGetterFn,
   TokenStore,
+  TokenToValueItem,
 } from "../types";
 import { extName } from "../constants";
 import { getFilePathIfIsAbsolute } from "../utils";
@@ -30,7 +31,7 @@ class ExternalTokenStorage implements Disposable {
   /**
    * Token store (fetched, parsed and cached data)
    */
-  private externalTokenStore: TokenStore = {};
+  private externalTokenCache: TokenStore = {};
 
   constructor() {
     this.initializeConfigurationWatcher();
@@ -39,7 +40,16 @@ class ExternalTokenStorage implements Disposable {
 
   public async getTokenValue(token: string): Promise<string | undefined> {
     // it might become really async in the future, for now we keep the Promise wrapper
-    return await Promise.resolve(this.externalTokenStore[token]?.value);
+    return await Promise.resolve(this.externalTokenCache[token]?.value);
+  }
+
+  public async getTokenSubStoreAsArray(): Promise<TokenToValueItem[]> {
+    return Object.keys(this.externalTokenCache).reduce((result, token) => {
+      return [
+        ...result,
+        { token, value: this.externalTokenCache[token].value },
+      ];
+    }, [] as { token: string; value: string }[]);
   }
 
   public dispose() {
@@ -96,7 +106,7 @@ class ExternalTokenStorage implements Disposable {
      * Empty external tokens if no valid configuration provided
      */
     if (!tokenCollectionGetter || !tokenCollectionPath) {
-      this.externalTokenStore = {};
+      this.externalTokenCache = {};
       return;
     }
 
@@ -104,7 +114,7 @@ class ExternalTokenStorage implements Disposable {
       getFilePathIfIsAbsolute(tokenCollectionPath);
 
     if (!tokenCollectionAbsolutePath) {
-      this.externalTokenStore = {};
+      this.externalTokenCache = {};
       return;
     }
 
@@ -114,7 +124,7 @@ class ExternalTokenStorage implements Disposable {
 
     switch (tokenCollectionGetter) {
       case "json-array":
-        this.externalTokenStore = (tokenCollection as JsonArrayTokens).reduce(
+        this.externalTokenCache = (tokenCollection as JsonArrayTokens).reduce(
           (result, data) => {
             result[data.token] = { value: data.value };
 
@@ -124,7 +134,7 @@ class ExternalTokenStorage implements Disposable {
         );
         break;
       case "json-map":
-        this.externalTokenStore = Object.entries(
+        this.externalTokenCache = Object.entries(
           tokenCollection as JsonMapTokens
         ).reduce((result, tokenValue) => {
           result[tokenValue[0]] = { value: tokenValue[1] };
@@ -138,7 +148,7 @@ class ExternalTokenStorage implements Disposable {
         const getterFn: TokenCollectionGetterFn = file;
         const array = await getterFn(tokenCollectionAbsolutePath);
 
-        this.externalTokenStore = array.reduce((result, data) => {
+        this.externalTokenCache = array.reduce((result, data) => {
           result[data.token] = { value: data.value };
 
           return result;
