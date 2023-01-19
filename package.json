@@ -3,7 +3,7 @@
   "displayName": "Text Tokenizer",
   "publisher": "vkrepkiy",
   "description": "Replace text with tokens, generate list of changes, get inline token-to-value hints",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "license": "MIT",
   "icon": "icon.png",
   "repository": {
