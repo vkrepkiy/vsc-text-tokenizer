@@ -71,17 +71,22 @@ async function findTokenForValue(text: string) {
 async function replaceSelectionsWithToken(editor: TextEditor) {
   const selectedText = editor.document.getText(editor.selection);
   const proposedToken = await findTokenForValue(selectedText);
-  const token = await askForToken(selectedText, proposedToken);
+  const { token, isExternal } = await askForToken(selectedText, proposedToken);
 
   if (!token) {
     window.showInformationMessage("No token was provided");
     return;
   }
 
-  await TokenizerStorage.setToken(
-    token,
-    editor.document.getText(editor.selection)
-  );
+  /**
+   * TODO: I'm not sure about this logic... need to use for a bit
+   */
+  if (!isExternal) {
+    await TokenizerStorage.setToken(
+      token,
+      editor.document.getText(editor.selection)
+    );
+  }
 
   await editor.edit((editBuilder) => {
     editor.selections.forEach((selection) => {
@@ -99,7 +104,7 @@ async function replaceSelectionsWithToken(editor: TextEditor) {
 async function askForToken(
   selectedText: string,
   preDefinedToken?: string
-): Promise<string> {
+): Promise<{ token: string; isExternal?: boolean }> {
   const token = await window.showInputBox({
     prompt: "Enter localization token",
     value: preDefinedToken,
@@ -107,17 +112,17 @@ async function askForToken(
   });
 
   if (token === undefined) {
-    return "";
+    return { token: "" };
   }
 
-  const storedTokenValue =
-    (await TokenizerStorage.getTokenValue(token)) ||
-    (await externalTokenStorage.getTokenValue(token));
+  const localValue = await TokenizerStorage.getTokenValue(token);
+  const externalValue = await externalTokenStorage.getTokenValue(token);
+  const storedTokenValue = localValue || externalValue;
 
   switch (storedTokenValue) {
     case undefined:
     case selectedText:
-      return token;
+      return { token, isExternal: !!externalValue };
     default:
       const overwriteValue = Symbol("overwriteValue");
       const changeToken = Symbol("renameToken");
@@ -141,11 +146,12 @@ async function askForToken(
 
       switch (overwrite?.value) {
         case overwriteValue:
-          return token;
+          // the value is changing so consider it local
+          return { token, isExternal: false };
         case changeToken:
           return askForToken(selectedText, token);
         default:
-          return "";
+          return { token: "" };
       }
   }
 }

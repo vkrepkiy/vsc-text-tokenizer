@@ -1,4 +1,4 @@
-import { Memento } from "vscode";
+import { EventEmitter, Memento } from "vscode";
 import { tokenStoreKey } from "../constants";
 import { TokenStore, TokenToValueItem } from "../types";
 
@@ -9,6 +9,9 @@ import { TokenStore, TokenToValueItem } from "../types";
  * TODO: I don't know why I made it static. Should make it normal later. For now it works
  */
 export class TokenizerStorage {
+  private static _storeChanged = new EventEmitter<void>();
+  public static onChange = this._storeChanged.event;
+
   private static get emptyTokenSubStoreState() {
     return {};
   }
@@ -56,6 +59,7 @@ export class TokenizerStorage {
       tokenStoreKey,
       TokenizerStorage.emptyTokenSubStoreState
     );
+    TokenizerStorage._storeChanged.fire();
   }
 
   public static async hasToken(token: keyof TokenStore) {
@@ -68,11 +72,13 @@ export class TokenizerStorage {
     tmpResultsStore[token] = {
       value,
     };
+    TokenizerStorage._storeChanged.fire();
   }
 
   public static async removeToken(token: keyof TokenStore) {
     const tmpResultsStore = await TokenizerStorage.getTokenSubStore();
     delete tmpResultsStore[token];
+    TokenizerStorage._storeChanged.fire();
   }
 
   public static async getTokenValue(

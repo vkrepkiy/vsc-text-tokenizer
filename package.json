@@ -33,11 +33,53 @@
     "commands": [
       {
         "command": "text-tokenizer.replace-with-token",
-        "title": "Text tokenizer: Replace selection with a token"
+        "title": "Replace selection with a token",
+        "shortTitle": "Replace",
+        "category": "Text tokenizer",
+        "icon": "$(replace-all)"
       },
       {
         "command": "text-tokenizer.generate-results",
-        "title": "Text tokenizer: Generate results and clean cache"
+        "title": "Preview tokenization results",
+        "shortTitle": "Preview tokenization",
+        "category": "Text tokenizer",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "text-tokenizer.generate-results-and-drop",
+        "title": "Finish tokenization",
+        "shortTitle": "Finish tokenization",
+        "category": "Text tokenizer",
+        "icon": "$(check-all)"
+      },
+      {
+        "command": "text-tokenizer.fetch-external-token-storage",
+        "title": "Refresh external token storage",
+        "shortTitle": "Refresh ext. tokens",
+        "category": "Text tokenizer",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "text-tokenizer.tokenization-progress.copy-token",
+        "title": "Copy token",
+        "category": "Text tokenizer",
+        "icon": "$(symbol-type-parameter)",
+        "enablement": "view == text-tokenizer.tokenizationProgressUI"
+      },
+      {
+        "command": "text-tokenizer.tokenization-progress.copy-value",
+        "title": "Copy value",
+        "category": "Text tokenizer",
+        "icon": "$(symbol-text)",
+        "enablement": "view == text-tokenizer.tokenizationProgressUI"
+      },
+      {
+        "command": "text-tokenizer.tokenization-progress.remove-token",
+        "title": "Remove token",
+        "shortTitle": "Remove",
+        "category": "Text tokenizer",
+        "icon": "$(trash)",
+        "enablement": "view == text-tokenizer.tokenizationProgressUI"
       }
     ],
     "menus": {
@@ -45,6 +87,52 @@
         {
           "when": "!editorReadonly && editorHasSelection",
           "command": "text-tokenizer.replace-with-token"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "text-tokenizer.generate-results",
+          "when": "view == text-tokenizer.tokenizationProgressUI",
+          "group": "navigation"
+        },
+        {
+          "command": "text-tokenizer.generate-results-and-drop",
+          "when": "view == text-tokenizer.tokenizationProgressUI"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "text-tokenizer.tokenization-progress.copy-token",
+          "when": "view == text-tokenizer.tokenizationProgressUI && viewItem == token",
+          "group": "inline"
+        },
+        {
+          "command": "text-tokenizer.tokenization-progress.copy-value",
+          "when": "view == text-tokenizer.tokenizationProgressUI && viewItem == token",
+          "group": "inline"
+        },
+        {
+          "command": "text-tokenizer.tokenization-progress.remove-token",
+          "when": "view == text-tokenizer.tokenizationProgressUI && viewItem == token"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "text-tokenizer",
+          "title": "Text Tokenizer",
+          "icon": "$(symbol-type-parameter)"
+        }
+      ]
+    },
+    "views": {
+      "text-tokenizer": [
+        {
+          "id": "text-tokenizer.tokenizationProgressUI",
+          "name": "Tokenization progress",
+          "type": "tree",
+          "visibility": "visible"
         }
       ]
     },

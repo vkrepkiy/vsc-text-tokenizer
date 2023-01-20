@@ -1,4 +1,4 @@
-import { Disposable, FileSystemWatcher, workspace } from "vscode";
+import { Disposable, EventEmitter, FileSystemWatcher, workspace } from "vscode";
 import { tokenizerConfiguration } from "./tokenizer-configuration";
 import {
   JsonArrayTokens,
@@ -9,6 +9,7 @@ import {
 } from "../types";
 import { extName } from "../constants";
 import { getFilePathIfIsAbsolute } from "../utils";
+import { readFileSync } from "fs";
 
 /**
  * Provides the following features:
@@ -16,6 +17,9 @@ import { getFilePathIfIsAbsolute } from "../utils";
  * - fallback to defaults if no user-defined configuration is found
  */
 class ExternalTokenStorage implements Disposable {
+  private storeChanged = new EventEmitter<void>();
+  public onChange = this.storeChanged.event;
+
   private disposables: Disposable[] = [];
 
   /**
@@ -31,10 +35,20 @@ class ExternalTokenStorage implements Disposable {
   /**
    * Token store (fetched, parsed and cached data)
    */
-  private externalTokenCache: TokenStore = {};
+  private set externalTokenCache(data: TokenStore) {
+    this._externalTokenCache = data;
+    this.storeChanged.fire();
+  }
+
+  private get externalTokenCache(): TokenStore {
+    return this._externalTokenCache;
+  }
+
+  private _externalTokenCache: TokenStore = {};
 
   constructor() {
     this.initializeConfigurationWatcher();
+    this.initializeExternalTokenStoreWatcher();
     this.fetchExternalTokens();
   }
 
@@ -58,7 +72,7 @@ class ExternalTokenStorage implements Disposable {
     this.configurationWatcher?.dispose();
   }
 
-  public initializeConfigurationWatcher() {
+  private initializeConfigurationWatcher() {
     this.configurationWatcher?.dispose();
 
     this.configurationWatcher = workspace.onDidChangeConfiguration((e) => {
@@ -89,12 +103,16 @@ class ExternalTokenStorage implements Disposable {
     }
   }
 
+  public async refresh() {
+    return await this.fetchExternalTokens();
+  }
+
   /**
    * We do not want to trigger i/o on each value request, so read tokens before they are required
    *
    * TODO: decompose on smaller functions
    */
-  public async fetchExternalTokens() {
+  private async fetchExternalTokens() {
     const tokenCollectionGetter = tokenizerConfiguration.get(
       "tokenCollectionGetter"
     );
@@ -119,7 +137,7 @@ class ExternalTokenStorage implements Disposable {
     }
 
     const tokenCollection = tokenCollectionAbsolutePath
-      ? await import(tokenCollectionAbsolutePath)
+      ? JSON.parse(readFileSync(tokenCollectionAbsolutePath).toString("utf-8"))
       : [];
 
     switch (tokenCollectionGetter) {

@@ -12,6 +12,7 @@ import {
 import {
   extName,
   ThemeColorKeys,
+  tokenInProgressIcon,
   tokenNotFondIcon,
   tokenRegexpGroupName,
 } from "../constants";
@@ -47,12 +48,12 @@ class TokenizerDecorator implements Disposable {
 
   public initializeWatchers() {
     if (window.activeTextEditor) {
-      this.requestUpdateDecorations();
+      this.requestUpdateDecorations(true);
     }
 
     window.onDidChangeActiveTextEditor(
       () => {
-        this.requestUpdateDecorations();
+        this.requestUpdateDecorations(true);
       },
       this,
       this.disposables
@@ -60,7 +61,7 @@ class TokenizerDecorator implements Disposable {
 
     workspace.onDidChangeTextDocument(
       () => {
-        this.requestUpdateDecorations(true);
+        this.requestUpdateDecorations();
       },
       this,
       this.disposables
@@ -92,7 +93,8 @@ class TokenizerDecorator implements Disposable {
   }
 
   private getDecoratorRenderOptions(
-    tokenValue?: string
+    tokenValue?: string,
+    isInProgress?: boolean
   ): DecorationInstanceRenderOptions {
     if (!tokenValue) {
       return {
@@ -104,9 +106,11 @@ class TokenizerDecorator implements Disposable {
       };
     }
 
+    const prefix = isInProgress ? `${tokenInProgressIcon} ` : "";
+
     return {
       before: {
-        contentText: tokenValue,
+        contentText: `${prefix}${tokenValue}`,
         color: new ThemeColor(ThemeColorKeys.tokenFoundColor),
         textDecoration: tokenizerConfiguration.get("inlineValueCSS"),
       },
@@ -142,9 +146,13 @@ class TokenizerDecorator implements Disposable {
           /**
            * Check first in-memory (if any token has changed) and then look up in external store
            */
-          const tokenValue =
-            (await TokenizerStorage.getTokenValue(token)) ||
-            (await externalTokenStorage.getTokenValue(token));
+          const tokenInProgressValue = await TokenizerStorage.getTokenValue(
+            token
+          );
+          const tokenExternalValue = await externalTokenStorage.getTokenValue(
+            token
+          );
+          const tokenValue = tokenInProgressValue || tokenExternalValue;
 
           const range = new Range(startPos, endPos);
           const foundText = editor.document.getText(range);
@@ -160,7 +168,10 @@ class TokenizerDecorator implements Disposable {
           decoratedTokens.push({
             range: new Range(tokenStartPos, tokenEndPos),
             renderOptions: showInlineHints
-              ? this.getDecoratorRenderOptions(tokenValue)
+              ? this.getDecoratorRenderOptions(
+                  tokenValue,
+                  !!tokenInProgressValue
+                )
               : undefined,
             hoverMessage: tokenValue
               ? new MarkdownString(`**Token value:** ${tokenValue}`)
@@ -173,7 +184,7 @@ class TokenizerDecorator implements Disposable {
     editor.setDecorations(this.decorationInstance, decoratedTokens);
   }
 
-  public requestUpdateDecorations(throttle = false) {
+  public requestUpdateDecorations(doNotThrottle = false) {
     const editor = window.activeTextEditor;
 
     if (!editor) {
@@ -184,13 +195,14 @@ class TokenizerDecorator implements Disposable {
       clearTimeout(this.timer);
       this.timer = undefined;
     }
-    if (throttle) {
+
+    if (doNotThrottle) {
+      this.updateDecorations(editor);
+    } else {
       this.timer = setTimeout(
         () => this.updateDecorations(editor),
         TokenizerDecorator.defaultThrottleTimeMs
       );
-    } else {
-      this.updateDecorations(editor);
     }
   }
 }

@@ -1,5 +1,6 @@
 import { existsSync } from "fs";
 import { isAbsolute, resolve } from "path";
+import { Uri, Webview } from "vscode";
 
 export function toJsonDocument(json: unknown) {
   return JSON.stringify(json, null, 2);
@@ -18,4 +19,12 @@ export function getFilePathIfIsAbsolute(filePath: string) {
   } catch (e) {
     return undefined;
   }
+}
+
+export function getUri(
+  webview: Webview,
+  extensionUri: Uri,
+  pathList: string[]
+) {
+  return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList));
 }

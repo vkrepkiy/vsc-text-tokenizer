@@ -4,10 +4,18 @@ export const extId = `${extPublisher}.${extName}`;
 export const tokenStoreKey = "tmpTokenStore";
 export const stringPlaceholder = "%token%";
 export const tokenNotFondIcon = "🔴";
+export const tokenInProgressIcon = "🔹";
+
+export const tokenizationProgressUI = `${extName}.tokenizationProgressUI`;
 
 export enum TokenizerCommand {
   replaceWithToken = "text-tokenizer.replace-with-token",
   generateResults = "text-tokenizer.generate-results",
+  generateResultsAndDrop = "text-tokenizer.generate-results-and-drop",
+  refreshExternalTokenStorage = "text-tokenizer.fetch-external-token-storage",
+  tokenizationProgressCopyToken = "text-tokenizer.tokenization-progress.copy-token",
+  tokenizationProgressCopyValue = "text-tokenizer.tokenization-progress.copy-value",
+  tokenizationProgressRemoveToken = "text-tokenizer.tokenization-progress.remove-token",
 }
 
 /**
