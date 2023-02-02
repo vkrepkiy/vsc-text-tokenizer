@@ -30,6 +30,8 @@ class TokenizerConfiguration implements ExtensionConfiguration {
 
   inlineHints = true;
 
+  trimQuotes = true;
+
   public get<T extends keyof ExtensionConfiguration>(key: T) {
     return (
       workspace.getConfiguration(extName).get<ExtensionConfiguration[T]>(key) ??

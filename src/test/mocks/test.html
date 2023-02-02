@@ -24,11 +24,22 @@
       /></label>
 
       <div>details placeholder</div>
+
+      <!-- Need to think how to easily process this cases -->
+      <div :data-text="{{ `we have ${itemsCount} items` }}">
+        {{ `we have ${itemsCount} items` }}
+      </div>
     </form>
+
+    "token one 1"
 
     <script>
       useTranslator("token1");
       useTranslator("token2");
+
+      // 1. check correct rendering of values containing newlines in a tree view
+      // 2. also think of providing an "auto-trim brackets" option – super useful for hardcoded values in script files
+      const text = "text \n with a newline";
     </script>
   </body>
 </html>

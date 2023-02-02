@@ -55,6 +55,11 @@ export interface ExtensionConfiguration {
   inlineHints: boolean;
 
   /**
+   * Automatically trim quotation marks ( ' \" ` ) if they are equal on start/end of the selected value
+   */
+  trimQuotes: boolean;
+
+  /**
    * CSS to be applied to inline hints
    */
   inlineValueNotFoundCSS: string;

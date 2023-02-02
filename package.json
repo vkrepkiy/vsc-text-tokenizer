@@ -181,6 +181,11 @@
           "default": true,
           "description": "Activate inline hints (missing token value and previews)"
         },
+        "text-tokenizer.trimQuotes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically trim quotation marks ( ' \" ` ) if they are equal on start/end of the selected value"
+        },
         "text-tokenizer.inlineValueCSS": {
           "type": "string",
           "default": "position: relative;display: inline-block;margin: 0 5px 0 5px;padding: 0 5px 0 5px;border-radius: 5px;vertical-align: middle;opacity: 0.6;max-width: 150px;overflow: hidden;text-overflow: ellipsis;",

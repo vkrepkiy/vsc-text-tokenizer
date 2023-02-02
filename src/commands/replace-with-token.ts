@@ -68,8 +68,25 @@ async function findTokenForValue(text: string) {
   );
 }
 
+async function applyTrimQuotesConfig(text: string) {
+  const shouldTrim = await tokenizerConfiguration.get("trimQuotes");
+  const firstChar = text[0];
+  const lastChar = text[text.length - 1];
+
+  if (
+    shouldTrim &&
+    ["'", "`", '"'].includes(firstChar) &&
+    firstChar === lastChar
+  ) {
+    return text.slice(1, -1);
+  }
+
+  return text;
+}
+
 async function replaceSelectionsWithToken(editor: TextEditor) {
-  const selectedText = editor.document.getText(editor.selection);
+  let selectedText = editor.document.getText(editor.selection);
+  selectedText = await applyTrimQuotesConfig(selectedText);
   const proposedToken = await findTokenForValue(selectedText);
   const { token, isExternal } = await askForToken(selectedText, proposedToken);
 
@@ -82,10 +99,7 @@ async function replaceSelectionsWithToken(editor: TextEditor) {
    * TODO: I'm not sure about this logic... need to use for a bit
    */
   if (!isExternal) {
-    await TokenizerStorage.setToken(
-      token,
-      editor.document.getText(editor.selection)
-    );
+    await TokenizerStorage.setToken(token, selectedText);
   }
 
   await editor.edit((editBuilder) => {
