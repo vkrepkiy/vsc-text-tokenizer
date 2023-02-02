@@ -65,6 +65,6 @@ export class TokenizerTreeItem extends TreeItem {
         : TreeItemCollapsibleState.None
     );
     this.tooltip = value;
-    this.description = value;
+    this.description = value.replace("\n", "");
   }
 }
