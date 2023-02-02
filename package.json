@@ -1,6 +1,6 @@
 {
   "name": "text-tokenizer",
-  "displayName": "Text Tokenizer",
+  "displayName": "Text Tokenizer (localization)",
   "publisher": "vkrepkiy",
   "description": "Replace text with tokens, generate list of changes, get inline token-to-value hints",
   "version": "0.0.7",
