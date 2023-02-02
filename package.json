@@ -184,7 +184,12 @@
         "text-tokenizer.trimQuotes": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically trim quotation marks ( ' \" ` ) if they are equal on start/end of the selected value"
+          "description": "Removes equal leading and trailing quotation marks ( ' \" ` ) from a selected value"
+        },
+        "text-tokenizer.trimWhitespace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Removes the leading and trailing white space and line terminator characters from a selected value"
         },
         "text-tokenizer.inlineValueCSS": {
           "type": "string",

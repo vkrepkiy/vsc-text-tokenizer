@@ -55,9 +55,14 @@ export interface ExtensionConfiguration {
   inlineHints: boolean;
 
   /**
-   * Automatically trim quotation marks ( ' \" ` ) if they are equal on start/end of the selected value
+   * Removes equal leading and trailing quotation marks ( ' \" ` ) from a selected value
    */
   trimQuotes: boolean;
+
+  /**
+   * Removes the leading and trailing white space and line terminator characters from a selected value
+   */
+  trimWhitespace: boolean;
 
   /**
    * CSS to be applied to inline hints

@@ -84,8 +84,19 @@ async function applyTrimQuotesConfig(text: string) {
   return text;
 }
 
+async function applyTrimWhitespaceConfig(text: string) {
+  const shouldTrim = await tokenizerConfiguration.get("trimWhitespace");
+
+  if (shouldTrim) {
+    return text.trim();
+  }
+
+  return text;
+}
+
 async function replaceSelectionsWithToken(editor: TextEditor) {
   let selectedText = editor.document.getText(editor.selection);
+  selectedText = await applyTrimWhitespaceConfig(selectedText);
   selectedText = await applyTrimQuotesConfig(selectedText);
   const proposedToken = await findTokenForValue(selectedText);
   const { token, isExternal } = await askForToken(selectedText, proposedToken);
@@ -120,7 +131,7 @@ async function askForToken(
   preDefinedToken?: string
 ): Promise<{ token: string; isExternal?: boolean }> {
   const token = await window.showInputBox({
-    prompt: "Enter localization token",
+    prompt: "Enter token",
     value: preDefinedToken,
     validateInput: (value) => (!value ? "You need to provide a token" : null),
   });

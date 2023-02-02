@@ -32,6 +32,8 @@ class TokenizerConfiguration implements ExtensionConfiguration {
 
   trimQuotes = true;
 
+  trimWhitespace = true;
+
   public get<T extends keyof ExtensionConfiguration>(key: T) {
     return (
       workspace.getConfiguration(extName).get<ExtensionConfiguration[T]>(key) ??
