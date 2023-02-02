@@ -169,7 +169,11 @@
           ],
           "default": "json-map",
           "description": "Path to the file which has a default export of token getter function",
-          "markdownDescription": "Getter preset or path to the file with default export of a getter function. \n - `json-map` would handle JSON file in `{ \"your.token\": \"Text value\" }` format \n - `json-array` would handle JSON file in `{ token: \"your.token\", value: \"Text value\" }[]` format \n - `path/to/exported/function.js` should return JSON like the one expected when using `json-array` formatter preset. See readme for more details."
+          "markdownDescription": "Getter preset or path to the file with default export of a getter function. \n - `json-map` would handle JSON file in `{ \"your.token\": \"Text value\" }` format \n - `json-array` would handle JSON file in `{ token: \"your.token\", value: \"Text value\" }[]` format \n - `/abs/path/to/exported/function.js` should return JSON like the one expected when using `json-array` formatter preset. See README for more details."
+        },
+        "text-tokenizer.resultGeneratorPath": {
+          "type": "string",
+          "description": "Path (absolute) to the file which has a default export of result generator function (see examples in README)"
         },
         "text-tokenizer.tokenCollectionPath": {
           "type": "string",

@@ -44,6 +44,11 @@ export interface ExtensionConfiguration {
   tokenCollectionGetter: "json-map" | "json-array" | string | null;
 
   /**
+   * Path to the file which has a default export of token getter function
+   */
+  resultGeneratorPath: string;
+
+  /**
    * File under this path would be watched and `tokenCollectionGetter` function would be triggered on changes.
    * Required when `tokenCollectionGetter` is defined.
    */
@@ -87,3 +92,7 @@ export type JsonArrayTokens = TokenToValueItem[];
 export type TokenCollectionGetterFn = (
   tokenCollectionPath: string
 ) => Promise<TokenToValueItem[]>;
+
+export type ResultGeneratorFn = (
+  tokenCollection: TokenToValueItem[]
+) => Promise<unknown>;

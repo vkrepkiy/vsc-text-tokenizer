@@ -1,5 +1,5 @@
 import { commands, env, ExtensionContext, window } from "vscode";
-import { generateArrayDocument } from "./commands/generate-results";
+import { generateResults } from "./commands/generate-results";
 import { replaceWithToken } from "./commands/replace-with-token";
 import { externalTokenStorage } from "./core/external-token-storage";
 import { TokenizerStorage } from "./core/tokenizer-storage";
@@ -65,14 +65,14 @@ export function activate(context: ExtensionContext) {
   let generateResultsCmd = commands.registerCommand(
     TokenizerCommand.generateResults,
     async () => {
-      await generateArrayDocument();
+      await generateResults();
     }
   );
 
   let generateResultsAndDropCmd = commands.registerCommand(
     TokenizerCommand.generateResultsAndDrop,
     async () => {
-      await generateArrayDocument();
+      await generateResults();
       await TokenizerStorage.setTokenSubStoreEmpty();
     }
   );

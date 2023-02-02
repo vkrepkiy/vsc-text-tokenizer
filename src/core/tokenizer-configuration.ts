@@ -28,6 +28,8 @@ class TokenizerConfiguration implements ExtensionConfiguration {
 
   tokenCollectionPath = "";
 
+  resultGeneratorPath = "";
+
   inlineHints = true;
 
   trimQuotes = true;
