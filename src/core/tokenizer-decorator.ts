@@ -36,6 +36,8 @@ class TokenizerDecorator implements Disposable {
 
   private decorationInstance = window.createTextEditorDecorationType({});
 
+  private disabledForLangIds: string[] = [];
+
   constructor() {
     if (TokenizerDecorator.instance) {
       throw new Error("should be initialized once");
@@ -68,8 +70,11 @@ class TokenizerDecorator implements Disposable {
     );
 
     workspace.onDidChangeConfiguration(
-      (e) => {
+      async (e) => {
         if (e.affectsConfiguration(extName)) {
+          this.disabledForLangIds = await tokenizerConfiguration.get(
+            "disableInlineHintsFor"
+          );
           this.requestUpdateDecorations();
         }
       },
@@ -118,7 +123,7 @@ class TokenizerDecorator implements Disposable {
   }
 
   private async updateDecorations(editor: TextEditor) {
-    if (!editor) {
+    if (this.disabledForLangIds.includes(editor.document.languageId)) {
       return;
     }
 

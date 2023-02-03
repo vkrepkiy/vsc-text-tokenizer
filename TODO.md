@@ -1,7 +1,6 @@
 # TODO
 
-- add `contributes/viewsWelcome` with a friendly configuration form
-- add `ignoreFiles` or `files` pattern configuration to define in which files extension should be activated (by default for all?)
+- add `contributes/viewsWelcome` with a friendly configuration form activated (by default for all?)
 - make configuration validation on tokenizer-configuration class level
 - allow results to be merged to file (low priority)
 

@@ -32,6 +32,8 @@ class TokenizerConfiguration implements ExtensionConfiguration {
 
   inlineHints = true;
 
+  disableInlineHintsFor = [];
+
   trimQuotes = true;
 
   trimWhitespace = true;

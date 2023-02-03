@@ -60,6 +60,11 @@ export interface ExtensionConfiguration {
   inlineHints: boolean;
 
   /**
+   * Disable inline hints by Language ID (see https://code.visualstudio.com/docs/getstarted/tips-and-tricks#_change-language-mode).
+   */
+  disableInlineHintsFor: string[];
+
+  /**
    * Removes equal leading and trailing quotation marks ( ' \" ` ) from a selected value
    */
   trimQuotes: boolean;
