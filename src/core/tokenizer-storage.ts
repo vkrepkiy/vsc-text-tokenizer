@@ -33,12 +33,26 @@ export class TokenizerStorage {
     TokenizerStorage._vscodeStorage = vscodeStorage;
   }
 
+  /**
+   * HACK:
+   * Due to VS Code Memento realization we cannot just modify the store object,
+   * consider it as immutable (it won't persist between states).
+   * Update state and call the ._mementoUpdate()
+   */
   private static async getTokenSubStore(): Promise<TokenStore> {
     if (!TokenizerStorage.storage.keys().includes(tokenStoreKey)) {
       await TokenizerStorage.setTokenSubStoreEmpty();
     }
 
     return TokenizerStorage.storage.get(tokenStoreKey) as TokenStore;
+  }
+
+  /**
+   * Apply store update to Memento after change
+   */
+  private static async _mementoUpdate() {
+    const tokenStore = await TokenizerStorage.getTokenSubStore();
+    TokenizerStorage.storage.update(tokenStoreKey, tokenStore);
   }
 
   public static async getTokenSubStoreAsJson() {
@@ -60,6 +74,8 @@ export class TokenizerStorage {
       TokenizerStorage.emptyTokenSubStoreState
     );
     TokenizerStorage._storeChanged.fire();
+
+    await TokenizerStorage._mementoUpdate();
   }
 
   public static async hasToken(token: keyof TokenStore) {
@@ -73,12 +89,16 @@ export class TokenizerStorage {
       value,
     };
     TokenizerStorage._storeChanged.fire();
+
+    await TokenizerStorage._mementoUpdate();
   }
 
   public static async removeToken(token: keyof TokenStore) {
     const tmpResultsStore = await TokenizerStorage.getTokenSubStore();
     delete tmpResultsStore[token];
     TokenizerStorage._storeChanged.fire();
+
+    await TokenizerStorage._mementoUpdate();
   }
 
   public static async getTokenValue(
