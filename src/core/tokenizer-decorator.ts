@@ -128,7 +128,7 @@ class TokenizerDecorator implements Disposable {
     }
 
     const text = editor.document.getText();
-    const decoratedTokens: DecorationOptions[] = [];
+    const uniqueDecorations = new Map<string, DecorationOptions>();
     const regexps = this.getTokenLookupRegExps();
     const showInlineHints = !!tokenizerConfiguration.get("inlineHints");
 
@@ -163,30 +163,35 @@ class TokenizerDecorator implements Disposable {
           const foundText = editor.document.getText(range);
 
           const tokenRelativeIndex = foundText.indexOf(token);
-          const tokenStartPos = editor.document.positionAt(
-            match.index + tokenRelativeIndex
-          );
-          const tokenEndPos = editor.document.positionAt(
-            match.index + tokenRelativeIndex + token.length
-          );
+          const tokenStartI = match.index + tokenRelativeIndex;
+          const tokenEndI = match.index + tokenRelativeIndex + token.length;
 
-          decoratedTokens.push({
-            range: new Range(tokenStartPos, tokenEndPos),
-            renderOptions: showInlineHints
-              ? this.getDecoratorRenderOptions(
-                  tokenValue,
-                  !!tokenInProgressValue
-                )
-              : undefined,
-            hoverMessage: tokenValue
-              ? new MarkdownString(`**Token value:** ${tokenValue}`)
-              : undefined,
-          });
+          const decorationId = `${tokenStartI}:${tokenEndI}`;
+          if (!uniqueDecorations.has(decorationId)) {
+            const tokenStartPos = editor.document.positionAt(tokenStartI);
+            const tokenEndPos = editor.document.positionAt(tokenEndI);
+
+            uniqueDecorations.set(decorationId, {
+              range: new Range(tokenStartPos, tokenEndPos),
+              renderOptions: showInlineHints
+                ? this.getDecoratorRenderOptions(
+                    tokenValue,
+                    !!tokenInProgressValue
+                  )
+                : undefined,
+              hoverMessage: tokenValue
+                ? new MarkdownString(`**Token value:** ${tokenValue}`)
+                : undefined,
+            });
+          }
         }
       })
     );
 
-    editor.setDecorations(this.decorationInstance, decoratedTokens);
+    editor.setDecorations(
+      this.decorationInstance,
+      Array.from(uniqueDecorations.values())
+    );
   }
 
   public requestUpdateDecorations(doNotThrottle = false) {
