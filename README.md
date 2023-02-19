@@ -1,37 +1,53 @@
-# Text Tokenizer
+# Text Tokenizer (localization)
 
 This extension is developed to improve the process of replacing text parts with tokens (e.g. localization of hardcoded values) and to provide visual hints. To enable all features it's required to configure the extension.
 
-## Text tokenization
+## Usage example
 
-Each time you replace a string with a token it is stored in memory. You can make multiple replacement operations one by one and finally generate the results as a JSON file which can be easily processed for any application.
+- We have an application with hardcoded texts and need to localize it.
+- Translation JSON files should be in the `i18n/` folder in `[ { token: "token", value: "value" } ]` format.
+- In Typescript files should use `translate(token)` helper
+- HTML should use interpolation: `{{ $translate(token) }}`.
 
-## Inline and mouseover hints
+First, configure how the extension should replace strings in different file types. Open [workspace settings](https://code.visualstudio.com/docs/getstarted/settings) and add the following config.
 
-If properly configured (see "Configuration" section below) it would provide:
+```json
+"text-tokenizer.tokenWrappersByLanguageId": {
+  "html": "{{ $translate(\"%token%\") }}",
+  "typescript": "translate(\"%token%\")"
+},
+```
 
-- inline hints (useful to detect tokens without assigned values)
-- full-text value preview on mouseover.
+Second, configure how the extension should detect tokens.
 
-![Functionality presentation](./presentation.gif)
+```json
+"text-tokenizer.tokenLookupRegExps": [
+  "translate\\([\\n\\s\\r]*?(['\"`])(?<token>.+?)\\1"
+],
+```
 
-## Configuration
+Then start tokenization. Select a hardcoded string and run "Replace selection with a token" command. When everything is ready, run "Finish tokenization" command.
 
-It's recommended to define custom options in the [workspace settings](https://code.visualstudio.com/docs/getstarted/settings).
+![Replace context menu demo](assets/replace-and-results.gif)
 
-### Text tokenization configuration
-
-#### **text-tokenizer.tokenWrapper**
-
-The default scenario is to have a token inside some wrapper (e.g. a localization function or an HTML tag) Define a `text-tokenizer.tokenWrapper` and it would be sed as a fallback value if no override is configured in `text-tokenizer.tokenWrappersByLanguageId`.
+Finally, save the generated JSON as `i18n/locale.en.json` file and configure the extension to read values from the file to have inline hints.
 
 ```json
 {
-  "text-tokenizer.tokenWrapper": "$translate(\"%token%\")"
+  "text-tokenizer.tokenCollectionGetter": "json-array",
+  "text-tokenizer.tokenCollectionPath": "/Users/username/projects/my-project/i18n/locale.en.json"
 }
 ```
 
-#### **text-tokenizer.tokenWrappersByLanguageId**
+## UI overview
+
+Extension has a basic UI to track the tokenization progress and perform actions.
+
+![Extension UI](assets/extension-view-ui.png) ![Extension UI](assets/finish-tokenization-ui.png)
+
+## Configuration examples
+
+### **text-tokenizer.tokenWrappersByLanguageId**
 
 To have different wrappers for different file types you can define a `text-tokenizer.tokenWrappersByLanguageId` param. It relies on [language ID](https://code.visualstudio.com/docs/getstarted/tips-and-tricks#_change-language-mode) detected by VS Code:
 
@@ -44,9 +60,7 @@ To have different wrappers for different file types you can define a `text-token
 }
 ```
 
-### Inline and mouseover hints configuration
-
-#### **text-tokenizer.tokenLookupRegExps**
+### **text-tokenizer.tokenLookupRegExps**
 
 It is possible to provide multiple regular expressions to let the extension to look up for different patterns to extract token. Each regular expression should have "token" named capturing group.
 
@@ -59,9 +73,9 @@ It is possible to provide multiple regular expressions to let the extension to l
 }
 ```
 
-#### **text-tokenizer.tokenCollectionPath**
+### **text-tokenizer.tokenCollectionPath**
 
-This option should be set up with the `text-tokenizer.tokenCollectionGetter`. It is used to watch file changes and update token list only when it is necessary.
+The option should be set up with the `text-tokenizer.tokenCollectionGetter`. It is used to extract tokens from some file and watch changes.
 
 - The path should be **absolute**.
 - If `text-tokenizer.tokenCollectionGetter` is set to the preset (e.g. `json-array`, `json-map`) the path should point to a valid **JSON** file.
@@ -73,16 +87,14 @@ This option should be set up with the `text-tokenizer.tokenCollectionGetter`. It
 }
 ```
 
-#### **text-tokenizer.tokenCollectionGetter**
+### **text-tokenizer.tokenCollectionGetter**
 
-It's possible to enable the functionality of getting code hints for the existing tokens (in-memory ones would be shown anyway) by providing the preset key or an absolute path to the file with the default export of the function.
+The option should be set to enable inline hints feature. Use a preset or a custom function. Available values:
 
-Available values:
-
-- `json-map` would read JSON file from `text-tokenizer.tokenCollectionPath` absolute path. Data should be in the following format:
+- `json-map` would read JSON file from `text-tokenizer.tokenCollectionPath`
 
 ```json
-// workspace.json
+// Workspace settings
 {
   "text-tokenizer.tokenCollectionGetter": "json-map",
   "text-tokenizer.tokenCollectionPath": "/absolute/path/to/token-collection.json"
@@ -96,10 +108,10 @@ Available values:
 }
 ```
 
-- `json-array` would read JSON file from `text-tokenizer.tokenCollectionPath` absolute path. Data should be in the following format:
+- `json-array` would read JSON file from `text-tokenizer.tokenCollectionPath`
 
 ```json
-// workspace.json
+// Workspace settings
 {
   "text-tokenizer.tokenCollectionGetter": "json-array",
   "text-tokenizer.tokenCollectionPath": "/absolute/path/to/token-collection.json"
@@ -118,10 +130,10 @@ Available values:
 ]
 ```
 
-- `/absolute/path/to/token-getter-function.js` pointing to a file containing default export with a function which **returns a Promise** with an array of tokens and values in the following format:
+- `/absolute/path/to/token-getter-function.js` – should point to a file with default export of a function which **returns a Promise**
 
 ```javascript
-// workspace.json
+// Workspace settings
 {
   "text-tokenizer.tokenCollectionGetter": "/absolute/path/to/token-getter-function.js",
   "text-tokenizer.tokenCollectionPath": "/absolute/path/to/token-collection.json"
@@ -155,11 +167,9 @@ module.exports = async function (tokenCollectionPath) {
 
 ```
 
-### Inline hints configuration
-
 Inline hints would be helpful if basic "mouseover hints" configuration is done.
 
-#### **text-tokenizer.inlineHints**
+### **text-tokenizer.inlineHints**
 
 Enable or disable inline hints. It would visualize values preview for each token and mark tokens without values.
 
@@ -169,7 +179,7 @@ Enable or disable inline hints. It would visualize values preview for each token
 }
 ```
 
-#### **text-tokenizer.inlineValueCSS**
+### **text-tokenizer.inlineValueCSS**
 
 CSS to be applied to inline hints when value is found.
 
@@ -179,7 +189,7 @@ CSS to be applied to inline hints when value is found.
 }
 ```
 
-#### **text-tokenizer.inlineValueNotFoundCSS**
+### **text-tokenizer.inlineValueNotFoundCSS**
 
 CSS to be applied to inline hints when value is not found.
 

@@ -24,9 +24,6 @@
     "l10n"
   ],
   "activationEvents": [
-    "onCommand:text-tokenizer.replace-with-token",
-    "onCommand:text-tokenizer.generate-results",
-    "onCommand:text-tokenizer.fetch-external-token-storage",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
