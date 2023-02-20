@@ -181,7 +181,7 @@ class TokenizerDecorator implements Disposable {
                 : undefined,
               hoverMessage: tokenValue
                 ? new MarkdownString(`**Token value:** ${tokenValue}`)
-                : undefined,
+                : new MarkdownString(`**Value not found for token:** ${token}`),
             });
           }
         }

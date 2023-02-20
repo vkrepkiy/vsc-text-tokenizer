@@ -154,7 +154,7 @@
         "text-tokenizer.tokenLookupRegExps": {
           "type": "array",
           "default": [
-            "translate\\([\\n\\s\\r]*?(['\"`])(?<token>.+?)\\1",
+            "$translate\\([\\n\\s\\r]*?(['\"`])(?<token>.+?)\\1",
             "useTranslator\\([\\n\\s\\r]*?(['\"`])(?<token>.+?)\\1"
           ],
           "description": "Regexps to detect tokens in files. Should expose a capturing group named 'token'"

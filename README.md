@@ -1,6 +1,6 @@
 # Text Tokenizer (localization)
 
-This extension is developed to improve the process of replacing text parts with tokens (e.g. localization of hardcoded values) and to provide visual hints. To enable all features it's required to configure the extension.
+This extension is developed to improve the process of replacing text parts with tokens (e.g. localization). To enable all features (like inline hints or custom result generation) it's required to configure the extension.
 
 ## Usage example
 
@@ -168,6 +168,25 @@ module.exports = async function (tokenCollectionPath) {
 ```
 
 Inline hints would be helpful if basic "mouseover hints" configuration is done.
+
+### **text-tokenizer.resultGeneratorPath**
+
+Custom result generator. Should point to a file with default export of a function.
+
+```javascript
+// Workspace settings
+{
+  "text-tokenizer.resultGeneratorPath": "/absolute/path/to/resultGenerator.js",
+}
+
+// resultGenerator.js
+module.exports = async function (resultsCollection) {
+  return resultsCollection.reduce((result, item) => {
+    result[item.token] = { translation: item.value }
+    return result
+  }, {})
+}
+```
 
 ### **text-tokenizer.inlineHints**
 
